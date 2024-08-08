@@ -1,0 +1,50 @@
+Build ubuntu-noble sdcard for Radxa rockpi4b:
+
+Input files: ../rootfs-ubuntu-noble/linaro-rootfs.img
+
+Plugin NVME SSD to PC.
+./mksdcardimg.sh
+Eject NVME SSD from PC.
+
+Plugin NVME SSD to SBC
+Login:
+Username: linaro
+Password: linaro
+uname -a
+lsb_release -a
+sudo dpkg-reconfigure tzdata
+sudo dpkg-reconfigure locales
+date
+sudo apt update
+sudo apt upgrade
+sudo apt dist-upgrade
+sync
+sudo shutdown -h now
+Power off, power on
+glxinfo | grep OpenGL
+date
+
+sudo apt install speedtest-cli python3-pip python3-setuptools ffmpeg mpv glmark2-es2-x11 glmark2-es2-wayland pandoc
+
+speedtest-cli
+
+glmark2-es2-wayland
+glmark2-es2
+
+aplay -l
+pavucontrol  ( select card 3 rockchip-hdmi1 as default )
+
+Chromium -> youtube.com -> search YmDNhi07_Ho
+
+git clone https://github.com/yt-dlp/yt-dlp.git
+cd yt-dlp
+make
+cd ../
+~/yt-dlp/yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]' hyUhEjtlDLA -o avemaria.mp4
+mpv avemaria.mp4
+
+sudo rfkill list
+sudo rfkill unblock bluetooth
+hciconfig hci0
+hcitool dev
+hciconfig -a

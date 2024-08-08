@@ -1,0 +1,11 @@
+Compile rootfs:
+
+make rootfs
+
+The result is in ./linaro-rootfs.img
+
+make basicrootfs
+
+The result is in ./linaro-basicrootfs.img
+
+make clean
