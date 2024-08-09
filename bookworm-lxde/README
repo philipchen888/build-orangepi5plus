@@ -1,4 +1,4 @@
-Build bookworm-lxde sdcard for Radxa rockpi4b:
+Build bookworm-lxde sdcard for orangepi 5 plus:
 
 Input files: ../rootfs-bookworm/linaro-rootfs.img
 

@@ -1,0 +1,82 @@
+Build android EMMC for orangepi 5 plus.
+
+1. Download Android image:
+   Download prebuilt image from http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-Pi-5-plus-32GB.html  ( android 12 )
+   mv ~/Downloads/Android*zip .
+   for file in *.zip; do 7z x "$file"; done
+   tar -xzf 'Android 12/SD Card-EMMC Image'/OrangePi5Plus_RK3588_Android12_v1.0.2.tar.gz
+
+2. Install adb, rkdeveloptool and upgrade_tool:
+   On PC install adb rkdeveloptool ( sudo apt install adb rkdeveloptool )
+   See https://github.com/industrialtablet/RK3588-Development-Board/blob/main/RK3588_Update_Firmware.md
+   Download Linux_Upgrade_Tool
+   git clone https://github.com/vicharak-in/Linux_Upgrade_Tool
+   cd Linux_Upgrade_Tool
+   sudo mv upgrade_tool /usr/local/bin
+   sudo chown root:root /usr/local/bin/upgrade_tool
+   sudo chmod a+x /usr/local/bin/upgrade_tool
+
+3. Flash Android image to on board spi and EMMC:
+   Put EMMC on orangepi 5 plus.
+   Put orangepi 5 plus into maskrom mode.  ( see users manual for how to put orangepi 5 plus into maskrom mode )
+   sudo rkdeveloptool ld                                               ( list devices )
+   sudo upgrade_tool ef OrangePi5Plus_RK3588_Android12_v1.0.2.img      ( EraseFlash )
+   sudo upgrade_tool uf OrangePi5Plus_RK3588_Android12_v1.0.2.img EMMC ( UpgradeFirmware )
+
+4. Power on orangepi 5 plus, boot android:
+   Setup android, sign in play store.
+   Turn on developer mode: 
+   Settings -> About tablet -> click build number 7 times -> back -> System -> Developer options -> USB debugging enbale.
+   Connect usb cable from PC to orangepi 5 plus ( USB C port )
+   On PC type:
+   adb devices
+   adb root
+   adb shell
+   du -h /system
+   mount -o rw,remount /
+   exit
+
+   To install apks:
+   adb push drawing.apk /sdcard
+   adb push drawshape.apk /sdcard
+   adb push kaleidoscope.apk /sdcard
+   adb push myanalogclock.apk /sdcard
+   adb push randomsong.apk /sdcard
+   adb shell
+   cd /system/priv-app
+   ln -s /sdcard/drawing.apk .
+   ln -s /sdcard/drawshape.apk .
+   ln -s /sdcard/kaleidoscope.apk .
+   ln -s /sdcard/myanalogclock.apk .
+   ln -s /sdcard/randomsong.apk .
+   exit
+   adb install -r drawing.apk
+   adb install -r drawshape.apk
+   adb install -r kaleidoscope.apk
+   adb install -r myanalogclock.apk
+   adb install -r randomsong.apk
+   adb shell
+   mount -o ro,remount /
+   exit
+
+   To uninstall apks:
+   adb uninstall com.example.drawing
+   adb uninstall com.example.drawshape
+   adb uninstall com.example.kaleidoscope
+   adb uninstall com.example.myanalogclock
+   adb uninstall com.example.randomsong
+
+5. Download shutdown app from play store, click on shutdown icon to turn power off.
+
+-------------------------------------------------------------------
+
+To generate apk:
+1. Download android studio from https://developer.android.com/studio
+   vi ~/Downloads/android-studio/Install-Linux-tar.txt
+2. cd ~/Downloads/android-studio/bin
+3. ./studio.sh   ( add ~/Downloads/android-studio/bin to ~/.bashrc )
+4. Start to write project code and generate apk using android studio.
+
+-------------------------------------------------------------------
+
+If you no longer need android and want to go to debain / ubuntu, follow ../uboot/README to program spi for NVMe boot. Also remember to remove EMMC from orangepi 5 plus.

@@ -1,4 +1,4 @@
-export BOARD=radxa
+export BOARD=orangepi5plus
 export LB_BOOTSTRAP_INCLUDE="apt-transport-https"
 export ARCH=arm64
 export CROSS_COMPILE=/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
