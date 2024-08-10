@@ -1,0 +1,4 @@
+sudo systemctl stop piaware
+sudo service dump1090-fa start
+sudo service piaware start
+sudo piaware-status
