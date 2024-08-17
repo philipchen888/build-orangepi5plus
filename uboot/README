@@ -1,6 +1,6 @@
 Build uboot image for orangepi 5 plus.
 
-Boot NVMe without sdcard, program spi boot:
+Boot NVMe without sdcard, need to flash u-boot image to spi:
 See https://github.com/si0ls/u-boot-orangepi5
 
 Download Orangepi5plus_1.0.8_debian_bookworm_desktop_xfce_linux6.1.43.7z from http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-Pi-5-plus-32GB.html
@@ -17,3 +17,17 @@ sudo dd if=/dev/zero of=/dev/mtdblock0 bs=1M count=16 status=progress conv=notru
 sudo dd if=./u-boot-v2024.07-orangepi5-plus-spi.bin of=/dev/mtdblock0 bs=1M status=progress conv=notrunc,fsync
 
 After step 1,2,3 done, Boot NVMe without sdcard.
+
+--------------------------------------------------
+
+Compile uboot from source:
+
+wget https://source.denx.de/u-boot/u-boot/-/archive/v2024.07/u-boot-v2024.07.tar.gz
+tar -xzf u-boot-v2024.07.tar.gz
+mv u-boot-v2024.07 u-boot
+wget https://github.com/rockchip-linux/rkbin/archive/refs/heads/master.tar.gz
+tar -xzf master.tar.gz
+mv rkbin-master rkbin
+make u-boot
+The result is in ./out/u-boot-v2024.07-orangepi5-plus-spi.bin
+

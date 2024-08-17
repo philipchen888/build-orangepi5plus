@@ -6,6 +6,7 @@ Parts needed:
 3. Sandisk 64GB micro sdcard.    ( install u-boot in on board spi )
 4. Host PC with ubuntu 22.
 5. M.2 NVMe SSD enclosure.
+6. EMMC module.                  ( install android on EMMC )
 
 Steps to build orangepi5plus sdcard image:
 
@@ -79,6 +80,8 @@ Steps to build orangepi5plus sdcard image:
     ./mksdcardimg.sh
     Eject NVME SSD from PC.
 
-12. cd ~/build-orangepi5plus/android     ( Build android image )
+12. cd ~/build-orangepi5plus/android       ( Build android image )
 
 13. cd ~/build-orangepi5plus/bookworm-flightaware  ( flightaware in bookworm-lxde )
+
+14. cd ~/build-orangepi5plus/yocto-xfce    ( Build yocto xfce-desktop )

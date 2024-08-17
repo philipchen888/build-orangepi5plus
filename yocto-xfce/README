@@ -1,0 +1,87 @@
+Build yocto xfce-desktop sdcard image for orangepi 5 plus.
+
+   input files: ../linux/linux-rockchip/tmp/lib/modules/*
+                ../linux/linux-rockchip/tmp/boot/*
+
+   Need 300GB free space in hard disk since yocto downloads many source files.
+   mkdir ${HOME}/download
+   mkdir ${HOME}/sstate-cache
+   git clone git://git.yoctoproject.org/poky --depth=1 -b scarthgap
+   cd poky
+   git clone git://git.openembedded.org/meta-openembedded.git --depth=1 -b scarthgap
+   git clone https://github.com/jonmason/meta-arm.git --depth=1 -b master
+   git clone https://git.yoctoproject.org/meta-rockchip.git --depth=1 -b scarthgap
+   source oe-init-build-env
+   cd ../../
+   make apply_patches
+
+   cd poky; source oe-init-build-env;
+   bitbake -s
+   bitbake -c cleansstate linux-yocto-dev xfce-desktop-image
+   bitbake linux-yocto-dev
+   vi ./tmp/work-shared/orangepi-5-plus/kernel-source/security/security.c ( comment out EXPORT_SYMBOL_GPL(security_path_rmdir); )
+   bitbake linux-yocto-dev 
+   bitbake -k xfce-desktop-image
+
+   The result is in ./tmp/deploy/images/orangepi-5-plus/xfce-desktop-image-orangepi-5-plus.rootfs.wic
+
+   Plugin sdcard to PC.
+   sudo dd if=./tmp/deploy/images/orangepi-5-plus/xfce-desktop-image-orangepi-5-plus.rootfs.wic of=/dev/sda bs=4096 conv=notrunc,fsync
+
+   sudo mount /dev/sda1 /mnt
+   sudo \rm -rf /mnt/boot/*
+   sudo \rm -rf /mnt/lib/modules/*
+   sudo cp -r ../../../linux/linux-rockchip/tmp/boot/* /mnt/boot
+   sudo cp ../../patches/initrd.img-6.1.75 /mnt/boot
+   sudo cp ../../patches/extlinux.conf /mnt/boot/extlinux
+   sudo cp -r ../../../linux/linux-rockchip/tmp/lib/modules/* /mnt/lib/modules
+   sync
+   sudo umount /mnt
+   Eject sdcard from PC.
+
+   \rm -rf ./tmp/work
+
+Plugin sdcard to orangepi 5 plus.
+login:
+username: root
+password: none
+
+resize-helper
+df .
+
+\rm /etc/localtime
+ln -s /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
+date
+
+adduser linaro
+usermod -aG sudo linaro
+
+aplay -l
+vi /etc/asound.conf ( add
+pcm.!default {
+type hw
+card 3
+}
+ctl.!default {
+type hw
+card 3
+}
+
+To disable screen saver:
+vi /etc/rc.local ( add
+#!/bin/sh
+/usr/bin/xset -dpms s off s noblank s 0 0 s noexpose
+
+chmod 755 /etc/rc.local
+source /etc/rc.local
+
+sync
+reboot
+date
+source /etc/rc.local
+
+glmark2-es2     ( current mesa version cannot support orangepi 5 plus user space panfrost, waiting for future mesa version. Also we need to install mali-g610-firmware and libmali-g610-x11 for orangepi 5 plus )
+
+aplay /home/linaro/yoursong.wav
+mpv --no-video /home/linaro/yoursong.mp3
+mpv /home/linaro/yourvideo.mp4
