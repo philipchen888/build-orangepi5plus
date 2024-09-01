@@ -17,10 +17,10 @@ Build yocto xfce-desktop sdcard image for orangepi 5 plus.
 
    cd poky; source oe-init-build-env;
    bitbake -s
-   bitbake -c cleansstate linux-yocto-dev xfce-desktop-image
-   bitbake linux-yocto-dev
+   bitbake -c cleansstate linux-yocto-dev xfce-desktop-image mesa
+   bitbake mesa
+   bitbake -k xfce-desktop-image
    vi ./tmp/work-shared/orangepi-5-plus/kernel-source/security/security.c ( comment out EXPORT_SYMBOL_GPL(security_path_rmdir); )
-   bitbake linux-yocto-dev 
    bitbake -k xfce-desktop-image
 
    The result is in ./tmp/deploy/images/orangepi-5-plus/xfce-desktop-image-orangepi-5-plus.rootfs.wic
@@ -38,8 +38,6 @@ Build yocto xfce-desktop sdcard image for orangepi 5 plus.
    sync
    sudo umount /mnt
    Eject sdcard from PC.
-
-   \rm -rf ./tmp/work
 
 Plugin sdcard to orangepi 5 plus.
 login:
@@ -77,10 +75,11 @@ source /etc/rc.local
 
 sync
 reboot
+login as root
 date
 source /etc/rc.local
 
-glmark2-es2     ( current mesa version cannot support orangepi 5 plus user space panfrost, waiting for future mesa version. Also we need to install mali-g610-firmware and libmali-g610-x11 for orangepi 5 plus )
+glmark2-es2    ( libEGL: Screen seems not DRI3 capable )
 
 aplay /home/linaro/yoursong.wav
 mpv --no-video /home/linaro/yoursong.mp3
