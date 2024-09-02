@@ -84,4 +84,6 @@ Steps to build orangepi5plus sdcard image:
 
 13. cd ~/build-orangepi5plus/bookworm-flightaware  ( flightaware in bookworm-lxde )
 
-14. cd ~/build-orangepi5plus/yocto-xfce    ( Build yocto xfce-desktop )
+14. cd ~/build-orangepi5plus/yocto-xfce    ( Build yocto xfce-desktop image )
+
+15. cd ~/build-orangepi5plus/buildroot     ( Build buildroot image )
