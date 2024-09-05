@@ -87,3 +87,5 @@ Steps to build orangepi5plus sdcard image:
 14. cd ~/build-orangepi5plus/yocto-xfce    ( Build yocto xfce-desktop image )
 
 15. cd ~/build-orangepi5plus/buildroot     ( Build buildroot image )
+
+16. cd ~/build-orangepi5plus/bookworm-uefi ( Build bookworm uefi image )
