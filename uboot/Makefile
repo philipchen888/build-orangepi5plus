@@ -12,6 +12,7 @@ clean:
 
 builduboot:
 	\rm -rf out; mkdir out;
+	cp ./patches/orangepi-5-plus-rk3588_defconfig ./u-boot/configs;
 	cd u-boot; \
 	make clean; \
 	make ARCH=arm64 orangepi-5-plus-rk3588_defconfig; \

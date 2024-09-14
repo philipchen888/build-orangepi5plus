@@ -6,10 +6,11 @@ Parts required:
 3. ADS-B 1090MHz PRO USB Stick.
 
 Input files: ../rootfs-bookworm/linaro-rootfs.img
+                               /linaro-esp.img
 
 Plugin sdcard to PC.
 ./mksdcardimg.sh
-sudo mount /dev/sda1 /mnt
+sudo mount /dev/sda2 /mnt
 cp ./flightaware/* /mnt/home/linaro
 sync
 sudo umount /mnt
@@ -36,9 +37,7 @@ sudo apt install tcltls
 wget https://www.flightaware.com/adsb/piaware/files/packages/pool/piaware/f/flightaware-apt-repository/flightaware-apt-repository_1.2_all.deb
 sudo dpkg -i flightaware-apt-repository_1.2_all.deb
 sudo apt update
-sudo apt install piaware
-sudo apt install dump1090-fa
-sudo apt install dump978-fa
+sudo apt install piaware dump1090-fa dump978-fa
 
 Change feeder-id on the last line of piaware.conf or comment out for the first time.
 For the first time you need to claim feeder-id from https://flightaware.com/adsb/piaware/claim after plugin ADS-B 1090MHz PRO USB Stick, filter and antenna.
@@ -65,3 +64,4 @@ It has aircraft's info, date, time, GPS position etc.
 ./flightdata.py
 
 The website is in https://flightaware.com/adsb/stats/user/yourusername
+The map is in browser http://192.168.86.234:8080/

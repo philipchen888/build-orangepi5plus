@@ -3,8 +3,8 @@ export LB_BOOTSTRAP_INCLUDE="apt-transport-https"
 export ARCH=arm64
 export CROSS_COMPILE=/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
 
-rootfs: clean prebuild buildrootfs postbuild mkimage
-basicrootfs: clean prebuild buildbasicrootfs postbuild mkbasicimage
+rootfs: clean prebuild buildrootfs postbuild mkimage mkespimage
+basicrootfs: clean prebuild buildbasicrootfs postbuild mkbasicimage mkespimage
 
 clean:
 	sudo lb clean --purge
@@ -74,3 +74,6 @@ mkimage:
 
 mkbasicimage:
 	$(PWD)/../mk-basicimage.sh
+
+mkespimage:
+	$(PWD)/../mk-espimage.sh

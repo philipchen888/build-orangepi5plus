@@ -3,7 +3,7 @@ export LB_BOOTSTRAP_INCLUDE="apt-transport-https"
 export ARCH=arm64
 export CROSS_COMPILE=/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
 
-rootfs: clean prebuild buildrootfs postbuild mkimage
+rootfs: clean prebuild buildrootfs postbuild mkimage mkespimage
 
 clean:
 	sudo lb clean --purge
@@ -36,7 +36,7 @@ prebuild:
 	--linux-packages none \
 	--parent-mirror-binary 'http://ports.ubuntu.com/ubuntu-ports/' \
 	--parent-mirror-binary-security 'http://ports.ubuntu.com/ubuntu-ports/' \
-	--parent-mirror-bootstrap 'http://ports.ubuntu.com/ubuntu-ports/' \
+	--parent-mirror-bootstrap 'http://ports.ubuntu.com/ubuntu-ports/'
 	--parent-mirror-chroot 'http://ports.ubuntu.com/ubuntu-ports/' \
 	--parent-mirror-chroot-security 'http://ports.ubuntu.com/ubuntu-ports/' \
 	--mode ubuntu \
@@ -59,3 +59,6 @@ postbuild:
 
 mkimage:
 	$(PWD)/../mk-image.sh
+
+mkespimage:
+	$(PWD)/../mk-ubuntuespimage.sh

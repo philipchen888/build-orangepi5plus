@@ -1,12 +1,13 @@
 Build bookworm-xfce-kde-gnome sdcard for orangepi 5 plus:
 
 Input files: ../rootfs-bookworm/linaro-basicrootfs.img
+                               /linaro-esp.img
 
-Plugin NVME SSD to PC.
+Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
 ./mksdcardimg.sh
-Eject NVME SSD from PC.
+Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-Plugin NVME SSD to SBC
+Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to SBC
 mouse right click on the screen, select terminal emulator.
 Login:
 Username: linaro
@@ -39,7 +40,7 @@ speedtest-cli
 glmark2-es2
 
 aplay -l
-pavucontrol  ( select card 3 rockchip-hdmi1 as default )
+pavucontrol  ( select card 2 rockchip-hdmi0 as default )
 
 Chromium -> youtube.com -> search YmDNhi07_Ho
 
@@ -49,8 +50,3 @@ make
 cd ../
 ~/yt-dlp/yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]' hyUhEjtlDLA -o avemaria.mp4
 mpv avemaria.mp4
-
-sudo rfkill list
-hciconfig hci0
-hcitool dev
-hciconfig -a

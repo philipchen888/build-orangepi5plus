@@ -1,7 +1,10 @@
+Need to run on ubuntu jammy amd64 host.
+
 Compile rootfs:
 
 make rootfs
 
-The result is in ./linaro-rootfs.img
+The results are in ./linaro-rootfs.img
+                   ./linaro-esp.img
 
 make clean

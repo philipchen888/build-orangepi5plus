@@ -2,10 +2,12 @@ Compile rootfs:
 
 make rootfs
 
-The result is in ./linaro-rootfs.img
+The results are in ./linaro-rootfs.img
+                   ./linaro-esp.img
 
 make basicrootfs
 
-The result is in ./linaro-basicrootfs.img
+The results are in ./linaro-basicrootfs.img
+                   ./linaro-esp.img
 
 make clean

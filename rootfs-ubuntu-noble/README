@@ -1,7 +1,10 @@
+sudo apt install qemu-user-static
+
 Compile rootfs:
 
 make rootfs
 
-The result is in ./linaro-rootfs.img
+The results are in ./linaro-rootfs.img
+                   ./linaro-esp.img
 
 make clean

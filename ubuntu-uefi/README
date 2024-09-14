@@ -1,0 +1,152 @@
+Build ubuntu-uefi sdcard image for orangepi 5 plus.
+
+See ../uboot/README, burn u-boot-v2024.07-orangepi5-plus-spi.bin to orangepi5plus spi nor flash.
+
+-----------------------------------------------------------
+Download Ubuntu iso.
+-----------------------------------------------------------
+
+cd ~/Downloads
+wget https://cdimage.ubuntu.com/jammy/daily-live/20240908/jammy-desktop-arm64.iso
+wget https://cdimage.ubuntu.com/noble/daily-live/20240908/noble-desktop-arm64.iso
+
+-----------------------------------------------------------
+Prepare USB2 SATA SSD and NVMe SSD.
+Burn jammy(noble)-desktop-arm64.iso to USB2 SATA SSD
+-----------------------------------------------------------
+
+cd ~/build-orangepi5plus/ubuntu-uefi
+Plugin USB2 SATA SSD to PC.
+sudo ./mksdcardimg.sh
+sudo mkfs.vfat /dev/sda1
+sudo fdisk -l /dev/sda
+sudo mount -t vfat /dev/sda1 /mnt
+cd /mnt
+sudo 7z x ~/Downloads/jammy(noble)-desktop-arm64.iso
+cd ~/build-orangepi5plus/ubuntu-uefi
+sync
+sudo umount /mnt
+Eject USB2 SATA SSD from PC.
+
+Plugin NVMe SSD to PC.
+sudo ./mksdcard.sh
+sudo mkfs.vfat /dev/sda1
+sudo mkfs.ext4 /dev/sda2
+sudo fdisk -l /dev/sda
+Eject NVMe SSD from PC.
+
+----------------------------------------------------------------------------
+Install Ubuntu to NVMe SSD using jammy(noble)-desktop-arm64.iso in USB2 SATA SSD.
+----------------------------------------------------------------------------
+
+Plugin the USB2 SATA SSD and NVMe SSD to orangepi5plus.
+Plugin ethernet cable to orangepi5plus. Power on orangepi5plus.
+
+Double click Install Ubuntu LTS icon.
+Select Erase disk and Install Ubuntu. Click Install now.
+Click Restart now when installation completed. 
+After boot, run setup then power down Ubuntu.
+
+Unplug USB2 SATA SSD from orangepi5plus.
+Plugin NVMe SSD to orangepi5plus. Plugin ethernet cable to orangepi5plus.
+Power on orangepi5plus.
+Disable power saving and screen saver.
+
+df .
+uname -a
+lsb_release -a
+date
+sudo apt update
+sudo apt upgrade
+sync
+sudo apt install net-tools openssh-server
+sudo ifconfig
+
+Check if Ubuntu is running UEFI mode:
+ls /sys/firmware/efi
+
+---------------------------------------------------------------------
+Compile and install custom kernel
+---------------------------------------------------------------------
+
+sudo apt install flex bison libelf-dev libssl-dev build-essential libncurses-dev git speedtest-cli glmark2-es2 glmark2-es2-wayland mpv ffmpeg python3-pip python3-setuptools pandoc pavucontrol zip rfkill vsftpd
+
+sudo vi /etc/vsftpd.conf ( anonymous_enable=NO, local_enable=YES, write_enable=YES )
+sudo systemctl restart vsftpd
+
+speedtest-cli
+glmark2-es2
+
+sudo vi /etc/apt/preferences.d/extra-ppas.pref ( add
+Package: *
+Pin: release o=LP-PPA-jjriek-rockchip
+Pin-Priority: 1001
+
+Package: *
+Pin: release o=LP-PPA-jjriek-rockchip-multimedia
+Pin-Priority: 1001
+)
+sudo add-apt-repository -y ppa:jjriek/panfork-mesa
+sudo apt-get update
+sudo apt-get -y install mali-g610-firmware
+sudo apt-get -y dist-upgrade
+sudo apt-get -y install libmali-g610-x11
+sudo apt-get update
+sudo apt-get upgrade -y
+sudo apt-get -y dist-upgrade
+
+nproc --all
+wget https://github.com/Joshua-Riek/linux-rockchip/archive/refs/tags/Ubuntu-rockchip-6.1.0-1020.20.tar.gz
+tar -xzf Ubuntu-rockchip-6.1.0-1020.20.tar.gz
+mv linux-rockchip-Ubuntu-rockchip-6.1.0-1020.20 linux-rockchip
+cp config-6.1.0-1020-rockchip ./linux-rockchip/arch/arm64/configs/defconfig
+cd linux-rockchip
+sudo make mrproper
+make ARCH=arm64 defconfig
+make ARCH=arm64 -j8     ( run on ubuntu terminal, it may take 2 hours to compile kernel )
+sudo make ARCH=arm64 modules_install
+sudo make ARCH=arm64 dtbs_install
+sudo make ARCH=arm64 install
+
+sudo vi /etc/grub.d/40_custom_uuid ( add
+#!/bin/sh
+exec tail -n +3 $0
+
+menuentry "Boot from UUID" {
+    search --no-floppy --fs-uuid --set=root 9c684b63-627e-48f5-94ac-cf2920813dfb
+    echo    'Loading Linux 6.1.75-arm64 ...'
+    linux /boot/vmlinuz-6.1.75 root=UUID=9c684b63-627e-48f5-94ac-cf2920813dfb rootwait rw
+    echo    'Loading initial ramdisk ...'
+    initrd /boot/initrd.img-6.1.75
+    echo    'Loading rk3588-orangepi-5-plus.dtb'
+    devicetree /boot/dtbs/6.1.75/rockchip/rk3588-orangepi-5-plus.dtb
+}
+)
+
+Note: change the above UUID to real UUID like: b3adbe54-ab88-4da5-a9a6-08cf87a09d69
+Fine real UUID: sudo blkid /dev/nvme0n1p2
+
+sudo chmod +x /etc/grub.d/40_custom_uuid
+sudo vi /etc/default/grub ( change GRUB_DEFAULT=0 to GRUB_DEFAULT="Boot from UUID" )
+sudo update-grub  ( generate grub.cfg )
+cd
+sync
+sudo reboot
+
+uname -a
+Check if Ubuntu is running UEFI mode:
+ls /sys/firmware/efi
+
+speedtest-cli
+glmark2-es2
+glmark2-es2-wayland
+
+aplay -l
+pavucontrol  ( select hdmi0 as default )
+
+git clone https://github.com/yt-dlp/yt-dlp.git
+cd yt-dlp
+make
+cd
+~/yt-dlp/yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]' hyUhEjtlDLA -o avemaria.mp4
+mpv avemaria.mp4

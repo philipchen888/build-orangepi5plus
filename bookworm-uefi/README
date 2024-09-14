@@ -40,7 +40,7 @@ sudo umount /mnt
 Eject USB2 sata ssd from PC.
 
 Plugin USB2 sata ssd to orangepi-5-plus USB2 port. Plugin ethernet cable to orangepi-5-plus. Plugin HDMI cable to hdmi0 port. Power on orangepi-5-plus.
-Select install
+Escape -> continue -> install
 ethernet hardware select the second one.
 User name: linaro
 Select debian desktop and gnome in addition to ssh and standard system utilities.
@@ -109,13 +109,28 @@ cp config-6.1.0-1020-rockchip ./linux-rockchip/arch/arm64/configs/defconfig
 cd linux-rockchip
 sudo make mrproper
 make ARCH=arm64 defconfig
-make ARCH=arm64 -j8   ( Don't use ssh. Run this command directly from orangepi 5 plus terminal )
+make ARCH=arm64 -j8   ( Don't use ssh. Run this command directly from orangepi 5 plus terminal. It may take 2 hours )
 sudo make ARCH=arm64 modules_install
 sudo make ARCH=arm64 dtbs_install
 sudo make ARCH=arm64 install
-sudo vi /boot/grub/grub.cfg ( after each line that has initrd  /boot/initrd.img-6.1.75  add 
-devicetree /boot/dtbs/6.1.75/rockchip/rk3588-orangepi-5-plus.dtb
+
+sudo vi /etc/grub.d/40_custom_uuid ( add
+#!/bin/sh
+exec tail -n +3 $0
+
+menuentry "Boot from UUID" {
+    search --no-floppy --fs-uuid --set=root 9c684b63-627e-48f5-94ac-cf2920813dfb
+    echo    'Loading Linux 6.1.75-arm64 ...'
+    linux /boot/vmlinuz-6.1.75 root=UUID=9c684b63-627e-48f5-94ac-cf2920813dfb rootwait rw
+    echo    'Loading initial ramdisk ...'
+    initrd /boot/initrd.img-6.1.75
+    echo    'Loading rk3588-orangepi-5-plus.dtb'
+    devicetree /boot/dtbs/6.1.75/rockchip/rk3588-orangepi-5-plus.dtb
+}
 )
+sudo chmod +x /etc/grub.d/40_custom_uuid
+sudo vi /etc/default/grub ( change GRUB_DEFAULT=0 to GRUB_DEFAULT="Boot from UUID" )
+sudo update-grub  ( generate grub.cfg )
 cd ~/
 sync
 sudo shutdown -h now

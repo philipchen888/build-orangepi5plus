@@ -1,15 +1,18 @@
 Build ubuntu-noble sdcard for orangepi 5 plus:
 
 Input files: ../rootfs-ubuntu-noble/linaro-rootfs.img
+                                   /linaro-esp.img
 
-Plugin NVME SSD to PC.
+Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
 ./mksdcardimg.sh
-Eject NVME SSD from PC.
+Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-Plugin NVME SSD to SBC
+Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to SBC.
+Run setup
 Login:
 Username: linaro
 Password: linaro
+Disable power saving and screen saver.
 uname -a
 lsb_release -a
 sudo dpkg-reconfigure tzdata
@@ -32,7 +35,7 @@ glmark2-es2-wayland
 glmark2-es2
 
 aplay -l
-pavucontrol  ( select card 3 rockchip-hdmi1 as default )
+pavucontrol  ( select card 2 rockchip-hdmi0 as default )
 
 Chromium -> youtube.com -> search YmDNhi07_Ho
 
@@ -42,9 +45,3 @@ make
 cd ../
 ~/yt-dlp/yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]' hyUhEjtlDLA -o avemaria.mp4
 mpv avemaria.mp4
-
-sudo rfkill list
-sudo rfkill unblock bluetooth
-hciconfig hci0
-hcitool dev
-hciconfig -a
