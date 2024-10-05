@@ -1,0 +1,30 @@
+all: clean readMifare memdump formatndef ndeftoclassic iso14443a_uid updatendef memerase ntag21x_rw 
+
+readMifare: pn532_i2c.c pn532.c readMifare.c
+	gcc -DI2C -g $^ -o $@
+
+memdump: pn532_i2c.c pn532.c memdump.c
+	gcc -DI2C -g $^ -o $@
+
+formatndef: pn532_i2c.c pn532.c formatndef.c
+	gcc -DI2C -g $^ -o $@
+
+ndeftoclassic: pn532_i2c.c pn532.c ndeftoclassic.c
+	gcc -DI2C -g $^ -o $@
+
+iso14443a_uid: pn532_i2c.c pn532.c iso14443a_uid.c
+	gcc -DI2C -g $^ -o $@
+
+updatendef: pn532_i2c.c pn532.c updatendef.c
+	gcc -DI2C -g $^ -o $@
+
+memerase: pn532_i2c.c pn532.c memerase.c
+	gcc -DI2C -g $^ -o $@
+
+ntag21x_rw: pn532_i2c.c pn532.c ntag21x_rw.c
+	gcc -DI2C -g $^ -o $@
+
+clean:
+	\rm -f readMifare memdump formatndef ndeftoclassic iso14443a_uid updatendef memerase ntag21x_rw
+
+.PHONY: all readMifare memdump formatndef ndeftoclassic iso14443a_uid updatendef memerase ntag21x_rw

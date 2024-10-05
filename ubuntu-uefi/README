@@ -124,7 +124,7 @@ menuentry "Boot from UUID" {
 )
 
 Note: change the above UUID to real UUID like: b3adbe54-ab88-4da5-a9a6-08cf87a09d69
-Fine real UUID: sudo blkid /dev/nvme0n1p2
+Find real UUID: sudo blkid /dev/nvme0n1p2
 
 sudo chmod +x /etc/grub.d/40_custom_uuid
 sudo vi /etc/default/grub ( change GRUB_DEFAULT=0 to GRUB_DEFAULT="Boot from UUID" )

@@ -4,10 +4,11 @@ Input files: ../rootfs-bookworm/linaro-rootfs.img
                                /linaro-esp.img
 
 Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
-./mksdcardimg.sh
+sudo ./mksdcardimg.sh
 Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
 Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to orangepi 5 plus.
+Plugin ethernet cable to orangepi 5 plus. Power on orangepi 5 plus.
 Login:
 Username: linaro
 Password: linaro
@@ -24,6 +25,8 @@ Power off, power on
 Disable power saving and screen saver.
 glxinfo | grep OpenGL
 date
+Check if Debian is running UEFI mode:
+ls /sys/firmware/efi
 
 sudo apt install speedtest-cli python3-pip python3-setuptools chromium chromium-sandbox ffmpeg mpv glmark2-es2-x11 pandoc
 

@@ -55,7 +55,7 @@ buildrootfs:
 	sudo lb build
 
 postbuild:
-	ARCH=arm64 $(PWD)/../mk-rootfs-ubuntu.sh
+	ARCH=arm64 $(PWD)/../mk-rootfs-ubuntu-noble.sh
 
 mkimage:
 	$(PWD)/../mk-image.sh

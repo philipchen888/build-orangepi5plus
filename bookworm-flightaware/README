@@ -9,14 +9,14 @@ Input files: ../rootfs-bookworm/linaro-rootfs.img
                                /linaro-esp.img
 
 Plugin sdcard to PC.
-./mksdcardimg.sh
+sudo ./mksdcardimg.sh
 sudo mount /dev/sda2 /mnt
 cp ./flightaware/* /mnt/home/linaro
 sync
 sudo umount /mnt
 Eject sdcard from PC.
 
-Plugin sdcard to orangepi 5 plus
+Plugin sdcard to orangepi 5 plus.
 Login:
 Username: linaro
 Password: linaro

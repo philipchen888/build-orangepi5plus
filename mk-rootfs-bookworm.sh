@@ -19,7 +19,7 @@ if [ ! $VERSION ]; then
 	VERSION="release"
 fi
 
-if [ ! -e binary-tar.tar.gz ]; then
+if [ ! -e live-image-arm64.tar.tar.gz ]; then
 	echo "\033[36m Run sudo lb build first \033[0m"
 fi
 
@@ -30,7 +30,7 @@ finish() {
 trap finish ERR
 
 echo -e "\033[36m Extract image \033[0m"
-sudo tar -xpf binary-tar.tar.gz
+sudo tar -xpf live-image-arm64.tar.tar.gz
 
 sudo cp -rf ../linux/linux-rockchip/tmp/lib/modules $TARGET_ROOTFS_DIR/lib
 sudo cp -rf ../linux/linux-rockchip/tmp/boot/* $TARGET_ROOTFS_DIR/boot
@@ -55,17 +55,16 @@ cat << EOF | sudo chroot $TARGET_ROOTFS_DIR
 rm -rf /etc/resolv.conf
 echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4" > /etc/resolv.conf
 resolvconf -u
-sed -e 's/bookworm\/updates main contrib non-free-firmware//g' < /etc/apt/sources.list > /etc/apt/tmp.list
-mv /etc/apt/tmp.list /etc/apt/sources.list
 echo -e "deb http://ppa.launchpad.net/jjriek/panfork-mesa/ubuntu jammy main" > /etc/apt/sources.list.d/panfork-mesa.list
 apt-get update
+\rm -rf /etc/initramfs/post-update.d/z50-raspi-firmware
 apt-get -y install mali-g610-firmware
 apt-get -y dist-upgrade
 apt-get -y install libmali-g610-x11
 apt-get update
 apt-get upgrade -y
 apt-get -y dist-upgrade
-apt-get install -y build-essential git wget v4l-utils grub-efi-arm64
+apt-get install -y build-essential git wget v4l-utils grub-efi-arm64 zstd
 
 # Install and configure GRUB
 mkdir -p /boot/efi
@@ -80,7 +79,7 @@ rm -rf /boot/40_custom_uuid
 rm -rf /boot/extlinux
 cat << GRUB_EOF > /etc/default/grub
 GRUB_DEFAULT="Boot from UUID"
-GRUB_TIMEOUT=20
+GRUB_TIMEOUT=5
 GRUB_CMDLINE_LINUX_DEFAULT="quiet"
 GRUB_CMDLINE_LINUX=""
 GRUB_EOF

@@ -1,0 +1,240 @@
+Build bookworm-gpio sdcard for orangepi 5 plus:
+
+Parts required for gpio tests:
+1. Seeed Grove starter kit LED, button, buzzer, Grove-LCD RGB Backlight V3.0 JHD1313M2.
+2. Analog Servo.
+3. Adafruit SSD1306 128x32 SPI OLED Display.
+
+The following 8 gpio tests are included: ( see below for tests summary )
+1. uart test
+2. led test
+3. button test
+4. pwm led test
+5. i2c lcd test
+6. tongsong
+7. servo
+8. spi oled test
+
+Parts required for pn532 nfc tests:
+1. nfc host controller card: Adafruit PN532 NFC Shield.
+2. Mifare Classic card and Mifare Ultralight tag.
+
+The following 8 pn532nfc tests are included:
+1. iso14443a_uid  ( read nfc card's uid )
+2. memdump        ( dump all memory in the nfc cards )
+3. readMifare     ( write read memory in the nfc cards )
+4. ntag21x_rw     ( write read mifareultralight )
+5. memerase       ( erase all memory in the nfc cards )
+6. formatndef     ( change mifareclassic to mifareclassic_ndef )
+7. updatendef     ( write read mifareclassic_ndef )
+8. ndeftoclassic  ( change mifareclassic_ndef to mifareclassic )
+
+wget http://www.orangepi.org/orangepiwiki/images/a/ac/Plus5-img302.png
+wget http://www.orangepi.org/orangepiwiki/images/5/53/Plus5-img184.png
+wget http://www.orangepi.org/orangepiwiki/images/6/6c/Plus5-img308.png
+
+Input files: ../rootfs-bookworm/linaro-rootfs.img
+                               /linaro-esp.img
+
+Plugin sdcard to PC.
+sudo ./mksdcardimg.sh
+sudo mount /dev/sda2 /mnt
+cp ./gpiotest/* /mnt/home/linaro
+cp ./pn532nfc/* /mnt/home/linaro
+sync
+sudo umount /mnt
+Eject sdcard from PC.
+
+Plugin sdcard to orangepi 5 plus.
+Login:
+Username: linaro
+Password: linaro
+uname -a
+lsb_release -a
+sudo dpkg-reconfigure tzdata
+sudo dpkg-reconfigure locales
+date
+sudo apt update
+sudo apt upgrade
+sync
+Disable power saving and screen saver.
+date
+
+sudo apt install python3-pip python3-setuptools python3-dev python3-smbus python3-smbus2 python3-spidev python3-serial python3-periphery
+
+gcc gpio_test.c -o gpio_test
+sudo ./gpio_test
+sudo ./gpio_test.py
+
+Check kernel driver readiness:
+ls /dev   ( look for i2c-2, spidev0.0, ttyS3 )
+sudo cat /proc/device-tree/serial@feb60000/status ( uart 3 )
+sudo cat /proc/device-tree/pwm@febf0020/status  ( pwm 14 )
+sudo cat /proc/device-tree/i2c@feaa0000/status  ( i2c-2 )
+sudo cat /proc/device-tree/spi@feb00000/status  ( spi-0 )
+
+sudo i2cdetect -y 2
+
+-----------------------------------------------------------------------------
+
+Here are the summary of the gpio tests:
+
+These tests used Seeed Grove starter kit LED, button, buzzer, Grove-LCD RGB Backlight V3.0 JHD1313M2, Analog Servo and Adafruit SSD1306 128x32 SPI OLED Display.
+
+1. uart test.
+   This test will send uart tx to uart rx for loopback.
+   It sends 0 to 255 to uart tx and receives 0 to 255 from uart rx.
+   Connect gpio pin 16 TX to pin 18 RX. ( uart 3 ).
+
+2. led test.
+   This test will blink led 5 times.
+   Connect gpio pin 10 to led control.
+   Connect gpio pin  2 to led 5V.
+   Connect gpio pin  9 to led ground.
+
+3. button test.
+   Push button 10 times. The led will on/off 10 times.
+   Connect gpio pin 10 to led control.
+   Connect gpio pin  2 to led 5V.
+   Connect gpio pin  9 to led ground.
+   Connect gpio pin  8 to button control.
+   Connect gpio pin  4 to button 5V.
+   Connect gpio pin  6 to button ground.
+
+4. pwm led test.
+   This test will dim led 10 times.
+   Connect gpio pin  7 to led control. ( pwm 14).
+   Connect gpio pin  2 to led 5V.
+   Connect gpio pin  9 to led ground.
+
+5. i2c lcd test.
+   This test will change lcd backlight color for 5 cycles.
+   Then it will display two sentences on lcd display.
+   Connect gpio pin  3 to lcd display SDA. ( i2c-2 ).
+   Connect gpio pin  5 to lcd display SCL.
+   Connect gpio pin  2 to lcd display 5V.
+   Connect gpio pin  9 to lcd display ground.
+
+6. tongsong.
+   This test will generate song using buzzer.
+   Connect gpio pin  7 to buzzer control. ( pwm 14 ).
+   Connect gpio pin  2 to buzzer 5V.
+   Connect gpio pin  9 to buzzer ground.
+
+7. servo.
+   This test will turn servo 45 degree - 90 degree - 45 degree - 0 degree etc.
+   Connect gpio pin  7 to servo control. ( pwm 14 ).
+   Connect gpio pin  2 to servo 5V.
+   Connect gpio pin  9 to servo ground.
+
+8. spi oled test.
+   This test will show some ascii characters on the oled display.
+   Connect gpio pin 10 to oled display DC.  ( spi-0 )
+   Connect gpio pin 24 to oled display CS.
+   Connect gpio pin 19 to oled display TX.
+   Connect gpio pin 23 to oled display CLK.
+   Connect gpio pin  1 to oled display 3.3V.
+   Connect gpio pin  9 to oled display ground.
+
+-----------------------------------------------------------------------------
+
+Datasheet of pn532 is in https://www.nxp.com/docs/en/nxp/data-sheets/PN532_C1.pdf
+application: https://www.nxp.com/docs/en/user-guide/141520.pdf
+https://raspberrypi.stackexchange.com/questions/109773/how-can-rpi-spi-python-read-the-mfrc522-nfc-module
+NFC info see https://www.nxp.com/docs/en/application-note/AN1305.pdf
+             https://www.nxp.com/docs/en/data-sheet/MF0ICU2.pdf
+examples: see https://github.com/nfc-tools/libfreefare/
+Tutorial: see https://learn.adafruit.com/adafruit-pn532-rfid-nfc/mifare
+To use Adafruit PN532 NFC Shield see https://learn.adafruit.com/adafruit-pn532-rfid-nfc
+https://pub.dev/documentation/grove/latest/grove/GroveNfcPn532Definitions-class.html
+
+-----------------------------------------------------------------------------
+
+Here are the summary of the pn532nfc tests:
+
+For spi:
+   Connect SBC gpio pin 19 to pn532nfc MOSI.  ( spi-0 )
+   Connect SBC gpio pin 24 to pn532nfc SSEL.
+   Connect SBC gpio pin 21 to pn532nfc MISO.
+   Connect SBC gpio pin 23 to pn532nfc SCLK.
+   Connect SBC gpio pin  2 to pn532nfc 5V.
+   Connect SBC gpio pin  9 to pn532nfc ground.
+
+For i2c:
+   Connect SBC gpio pin  3 to pn532nfc SDA. ( i2c-2 ).
+   Connect SBC gpio pin  5 to pn532nfc SCL.
+   Connect SBC gpio pin  2 to pn532nfc 5V.
+   Connect SBC gpio pin  9 to pn532nfc ground.
+
+For spi:
+make -f Makefile.spi all
+For i2c:
+make -f Makefile.i2c all
+
+sudo ./iso14443a_uid   ( for mifareclassic and mifareultralight )
+sudo ./memdump         ( for mifareclassic and mifareultralight )
+sudo ./readMifare      ( for mifareclassic and mifareultralight )
+sudo ./memdump         ( for mifareclassic and mifareultralight )
+sudo ./ntag21x_rw      ( for mifareultralight )
+sudo ./memdump         ( for mifareultralight )
+sudo ./memerase        ( for mifareclassic and mifareultralight )
+sudo ./memdump         ( for mifareclassic and mifareultralight )
+sudo ./formatndef      ( for mifareclassic )
+sudo ./memdump         ( for mifareclassic )
+sudo ./updatendef      ( for mifareclassic )
+sudo ./memdump         ( for mifareclassic )
+sudo ./memerase        ( for mifareclassic )
+sudo ./memdump         ( for mifareclassic )
+sudo ./ndeftoclassic   ( for mifareclassic )
+sudo ./memdump         ( for mifareclassic )
+sudo ./readMifare      ( for mifareclassic )
+sudo ./memdump         ( for mifareclassic )
+sudo ./memerase        ( for mifareclassic )
+sudo ./memdump         ( for mifareclassic )
+
+For spi:
+sudo python3 iso14443a_uid.py spi  ( for mifareclassic and mifareultralight )
+sudo python3 memdump.py spi        ( for mifareclassic and mifareultralight )
+sudo python3 readMifare.py spi     ( for mifareclassic and mifareultralight )
+sudo python3 memdump.py spi        ( for mifareclassic and mifareultralight )
+sudo python3 ntag21x_rw.py spi     ( for mifareultralight )
+sudo python3 memdump.py spi        ( for mifareultralight )
+sudo python3 memerase.py spi       ( for mifareclassic and mifareultralight )
+sudo python3 memdump.py spi        ( for mifareclassic and mifareultralight )
+sudo python3 formatndef.py spi     ( for mifareclassic )
+sudo python3 memdump.py spi        ( for mifareclassic )
+sudo python3 updatendef.py spi     ( for mifareclassic )
+sudo python3 memdump.py spi        ( for mifareclassic )
+sudo python3 memerase.py spi       ( for mifareclassic )
+sudo python3 memdump.py spi        ( for mifareclassic )
+sudo python3 ndeftoclassic.py spi  ( for mifareclassic )
+sudo python3 memdump.py spi        ( for mifareclassic )
+sudo python3 readMifare.py spi     ( for mifareclassic )
+sudo python3 memdump.py spi        ( for mifareclassic )
+sudo python3 memerase.py spi       ( for mifareclassic )
+sudo python3 memdump.py spi        ( for mifareclassic )
+
+For i2c:
+sudo python3 iso14443a_uid.py i2c  ( for mifareclassic and mifareultralight )
+sudo python3 memdump.py i2c        ( for mifareclassic and mifareultralight )
+sudo python3 readMifare.py i2c     ( for mifareclassic and mifareultralight )
+sudo python3 memdump.py i2c        ( for mifareclassic and mifareultralight )
+sudo python3 ntag21x_rw.py i2c     ( for mifareultralight )
+sudo python3 memdump.py i2c        ( for mifareultralight )
+sudo python3 memerase.py i2c       ( for mifareclassic and mifareultralight )
+sudo python3 memdump.py i2c        ( for mifareclassic and mifareultralight )
+sudo python3 formatndef.py i2c     ( for mifareclassic )
+sudo python3 memdump.py i2c        ( for mifareclassic )
+sudo python3 updatendef.py i2c     ( for mifareclassic )
+sudo python3 memdump.py i2c        ( for mifareclassic )
+sudo python3 memerase.py i2c       ( for mifareclassic )
+sudo python3 memdump.py i2c        ( for mifareclassic )
+sudo python3 ndeftoclassic.py i2c  ( for mifareclassic )
+sudo python3 memdump.py i2c        ( for mifareclassic )
+sudo python3 readMifare.py i2c     ( for mifareclassic )
+sudo python3 memdump.py i2c        ( for mifareclassic )
+sudo python3 memerase.py i2c       ( for mifareclassic )
+sudo python3 memdump.py i2c        ( for mifareclassic )
+
+-----------------------------------------------------------------------------
+

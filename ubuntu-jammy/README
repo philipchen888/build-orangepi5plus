@@ -26,6 +26,8 @@ sudo shutdown -h now
 Power off, power on
 glxinfo | grep OpenGL
 date
+Check if Ubuntu is running UEFI mode:
+ls /sys/firmware/efi
 
 sudo apt install speedtest-cli libjpeg-dev pkg-config libpng-dev libpng16-16 libdrm-dev libgbm-dev libwayland-dev wayland-protocols glmark2-es2 glmark2-es2-wayland python3-pip python3-setuptools ffmpeg mpv pandoc
 

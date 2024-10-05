@@ -12,15 +12,26 @@ Parts needed:
 Steps to build orangepi5plus sdcard image:
 
 1. git clone https://github.com/philipchen888/build-orangepi5plus.git
-   sudo apt-get install build-essential git libssl-dev nmap net-tools libncurses-dev dnsutils vsftpd ftp binfmt-support qemu-user-static scons libdbus-glib-1-dev libbluetooth-dev python3-dev python3-pip python3-setuptools libcurl4-openssl-dev gettext dbus-x11 chrpath diffstat gawk texinfo curl flex bison device-tree-compiler swig libmpc-dev debootstrap debhelper kpartx gdisk devscripts isolinux po4a libgnutls28-dev mtools python-is-python3 python3-pyelftools
+   sudo apt-get install build-essential git libssl-dev nmap net-tools libncurses-dev dnsutils vsftpd ftp binfmt-support qemu-user-static scons libdbus-glib-1-dev libbluetooth-dev python3-dev python3-pip python3-setuptools libcurl4-openssl-dev gettext dbus-x11 chrpath diffstat gawk texinfo curl flex bison device-tree-compiler swig libmpc-dev debootstrap debhelper kpartx gdisk devscripts isolinux po4a libgnutls28-dev mtools python-is-python3 python3-pyelftools u-boot-tools
 
 2. Install cross compiler and live-build:
    Go to https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
    wget https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz
    sudo tar -xJf arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz -C /usr/local/
+
+   For ubuntu-noble
    wget http://security.ubuntu.com/ubuntu/pool/main/l/live-build/live-build_3.0~a57-1ubuntu41.22.04.1_all.deb
    sudo dpkg -i live-build_3.0~a57-1ubuntu41.22.04.1_all.deb
    lb --version ( 3.0~a57-1 /usr/bin/lb )
+
+   For Debian and Ubuntu-jammy:
+   wget https://launchpad.net/debian/+archive/primary/+sourcefiles/live-build/1:20230502/live-build_20230502.tar.xz
+   tar xvf live-build_20230502.tar.xz
+   cd live-build
+   sudo make install
+   vi Makefile ( search LANGUAGE in $(LANGUAGES), delete for .. to done )
+   sudo make install
+   lb --version ( 20230502 )
 
 3. cd ~/build-orangepi5plus/uboot  ( Download u-boot to spi )
    Program spi flash with RK3588_NOR_FLASH.img for uefi boot:
@@ -44,7 +55,8 @@ Steps to build orangepi5plus sdcard image:
    The results are in ./linux-rockchip/tmp/lib/modules/*
                       ./linux-rockchip/tmp/boot/*
 
-5. cd ~/build-orangepi5plus/rootfs-bookworm  ( Compile debian bookworm rootfs )
+5. cd ~/build-orangepi5plus/rootfs-bullseye  ( Compile debian bullseye rootfs )
+   Need to run on ubuntu jammy amd64 host.
    make rootfs        ( has desktop )
    The results are in ./linaro-rootfs.img linaro-esp.img
 
@@ -52,51 +64,75 @@ Steps to build orangepi5plus sdcard image:
    The results are in ./linaro-basicrootfs.img linaro-esp.img
    make clean
 
-6. cd ~/build-orangepi5plus/rootfs-ubuntu-jammy  ( Compile debian ubuntu-jammy rootfs )
+6. cd ~/build-orangepi5plus/rootfs-bookworm  ( Compile debian bookworm rootfs )
+   make rootfs        ( has desktop )
+   The results are in ./linaro-rootfs.img linaro-esp.img
+
+   make basicrootfs   ( no desktop )
+   The results are in ./linaro-basicrootfs.img linaro-esp.img
+   make clean
+
+7. cd ~/build-orangepi5plus/rootfs-ubuntu-jammy  ( Compile debian ubuntu-jammy rootfs )
    Need to run on ubuntu jammy amd64 host.
    make rootfs
    The results are in ./linaro-rootfs.img linaro-esp.img
    make clean
 
-7. cd ~/build-orangepi5plus/rootfs-ubuntu-noble  ( Compile debian ubuntu-noble rootfs )
+8. cd ~/build-orangepi5plus/rootfs-ubuntu-noble  ( Compile debian ubuntu-noble rootfs )
    make rootfs
    The results are in ./linaro-rootfs.img linaro-esp.img
    make clean
 
-8. cd ~/build-orangepi5plus/bookworm-lxde  ( Build debian bookworm lxde-desktop image )
-   Input files: ../rootfs-bookworm/linaro-rootfs.img linaro-esp.img
+9. cd ~/build-orangepi5plus/bullseye-lxde  ( Build debian bullseye lxde-desktop image )
+   Need to run on ubuntu jammy amd64 host.
+   Input files: ../rootfs-bullseye/linaro-rootfs.img linaro-esp.img
    Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
-   ./mksdcardimg.sh
+   sudo ./mksdcardimg.sh
    Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-9. cd ~/build-orangepi5plus/bookworm-xfce-kde-gnome ( Build bookworm xfce-kde-gnome desktop image )
-   Input files: ../rootfs-bookworm/linaro-basicrootfs.img linaro-esp.img
-   Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
-   ./mksdcardimg.sh
-   Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
+10. cd ~/build-orangepi5plus/bookworm-lxde  ( Build debian bookworm lxde-desktop image )
+    Input files: ../rootfs-bookworm/linaro-rootfs.img linaro-esp.img
+    Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
+    sudo ./mksdcardimg.sh
+    Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-10. cd ~/build-orangepi5plus/ubuntu-jammy  ( Build ubuntu-jammy image )
+11. cd ~/build-orangepi5plus/bullseye-xfce-kde-gnome ( Build bullseye xfce-kde-gnome desktop image )
+    Need to run on ubuntu jammy amd64 host.
+    Input files: ../rootfs-bullseye/linaro-basicrootfs.img linaro-esp.img
+    Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
+    sudo ./mksdcardimg.sh
+    Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
+
+12. cd ~/build-orangepi5plus/bookworm-xfce-kde-gnome ( Build bookworm xfce-kde-gnome desktop image )
+    Input files: ../rootfs-bookworm/linaro-basicrootfs.img linaro-esp.img
+    Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
+    sudo ./mksdcardimg.sh
+    Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
+
+13. cd ~/build-orangepi5plus/ubuntu-jammy  ( Build ubuntu-jammy image )
     Need to run on ubuntu jammy amd64 host.
     Input files: ../rootfs-ubuntu-jammy/linaro-rootfs.img linaro-esp.img
     Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
     ./mksdcardimg.sh
     Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-11. cd ~/build-orangepi5plus/ubuntu-noble  ( Build ubuntu-noble image )
+14. cd ~/build-orangepi5plus/ubuntu-noble  ( Build ubuntu-noble image )
     Input files: ../rootfs-ubuntu-noble/linaro-rootfs.img linaro-esp.img
     Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
     ./mksdcardimg.sh
     Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-12. cd ~/build-orangepi5plus/android       ( Build android image )
+15. cd ~/build-orangepi5plus/android       ( Build android image )
 
-13. cd ~/build-orangepi5plus/bookworm-flightaware  ( flightaware in bookworm-lxde )
+16. cd ~/build-orangepi5plus/bookworm-flightaware  ( flightaware in bookworm-lxde )
 
-14. cd ~/build-orangepi5plus/yocto-xfce    ( Build yocto xfce-desktop image )
+17. cd ~/build-orangepi5plus/yocto-xfce    ( Build yocto xfce-desktop image )
 
-15. cd ~/build-orangepi5plus/buildroot     ( Build buildroot image )
+18. cd ~/build-orangepi5plus/buildroot     ( Build buildroot image )
 
-16. cd ~/build-orangepi5plus/bookworm-uefi ( Build bookworm uefi image )
+19. cd ~/build-orangepi5plus/bookworm-uefi ( Build bookworm uefi image )
 
-17. cd ~/build-orangepi5plus/ubuntu-uefi   ( Build ubuntu jammy/noble uefi images )
+20. cd ~/build-orangepi5plus/ubuntu-uefi   ( Build ubuntu jammy/noble uefi images )
     Install Ubuntu to NVMe SSD using jammy(noble)-desktop-arm64.iso in USB2 SATA SSD.
+
+21. cd ~/build-orangepi5plus/bookworm-gpio ( Build bookworm gpio tests )

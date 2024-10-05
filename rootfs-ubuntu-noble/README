@@ -1,5 +1,3 @@
-sudo apt install qemu-user-static
-
 Compile rootfs:
 
 make rootfs
