@@ -36,7 +36,7 @@ prebuild:
 	--linux-packages none \
 	--parent-mirror-binary 'http://ports.ubuntu.com/ubuntu-ports/' \
 	--parent-mirror-binary-security 'http://ports.ubuntu.com/ubuntu-ports/' \
-	--parent-mirror-bootstrap 'http://ports.ubuntu.com/ubuntu-ports/'
+	--parent-mirror-bootstrap 'http://ports.ubuntu.com/ubuntu-ports/' \
 	--parent-mirror-chroot 'http://ports.ubuntu.com/ubuntu-ports/' \
 	--parent-mirror-chroot-security 'http://ports.ubuntu.com/ubuntu-ports/' \
 	--mode ubuntu \

@@ -4,7 +4,7 @@ Input files: ../rootfs-ubuntu-jammy/linaro-rootfs.img
                                    /linaro-esp.img
 
 Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
-./mksdcardimg.sh
+sudo ./mksdcardimg.sh
 Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
 Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to SBC
