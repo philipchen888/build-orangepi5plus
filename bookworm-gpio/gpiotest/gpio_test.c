@@ -349,45 +349,98 @@ int servo( void )
 
 //------- I2C --------------------------------------
 
-void wiringPiI2CWriteReg8( int fd, int addr, int reg, int data )
-{
-    unsigned char buf[2] = { reg, data };
+int LCDAddr = 0x27;
+int BLEN = 1;
 
-    ioctl( fd, I2C_SLAVE, addr );
-    write( fd, buf, 2 );
+void i2c_write_word( int fd, int data )
+{
+    int temp = data;
+        if ( BLEN == 1 )
+                temp |= 0x08;
+        else
+                temp &= 0xF7;
+    unsigned char buf[1] = { temp };
+
+    ioctl( fd, I2C_SLAVE, LCDAddr );
+    write( fd, buf, 1 );
 }
 
-void set_backlight( int fd, int r, int g, int b )
-{
-    wiringPiI2CWriteReg8( fd, 0x62, 0, 0 );
-    wiringPiI2CWriteReg8( fd, 0x62, 1, 0 );
-    wiringPiI2CWriteReg8( fd, 0x62, 8, 0xaa );
-    wiringPiI2CWriteReg8( fd, 0x62, 4, r );
-    wiringPiI2CWriteReg8( fd, 0x62, 3, g );
-    wiringPiI2CWriteReg8( fd, 0x62, 2, b );
+void i2c_send_command(int fd, int comm){
+        int buf;
+        // Send bit7-4 firstly
+        buf = comm & 0xF0;
+        buf |= 0x04;                    // RS = 0, RW = 0, EN = 1
+        i2c_write_word(fd, buf);
+        usleep(2000);
+        buf &= 0xFB;                    // Make EN = 0
+        i2c_write_word(fd, buf);
+
+        // Send bit3-0 secondly
+        buf = (comm & 0x0F) << 4;
+        buf |= 0x04;                    // RS = 0, RW = 0, EN = 1
+        i2c_write_word(fd, buf);
+        usleep(2000);
+        buf &= 0xFB;                    // Make EN = 0
+        i2c_write_word(fd, buf);
 }
 
-void textCommand(int fd, int cmd)
-{
-    wiringPiI2CWriteReg8( fd, 0x3e, 0x80, cmd );
+void i2c_send_data(int fd, int data){
+        int buf;
+        // Send bit7-4 firstly
+        buf = data & 0xF0;
+        buf |= 0x05;                    // RS = 1, RW = 0, EN = 1
+        i2c_write_word(fd, buf);
+        usleep(2000);
+        buf &= 0xFB;                    // Make EN = 0
+        i2c_write_word(fd, buf);
+
+        // Send bit3-0 secondly
+        buf = (data & 0x0F) << 4;
+        buf |= 0x05;                    // RS = 1, RW = 0, EN = 1
+        i2c_write_word(fd, buf);
+        usleep(2000);
+        buf &= 0xFB;                    // Make EN = 0
+        i2c_write_word(fd, buf);
 }
 
-void setText(int fd, char * text)
-{
-    int i;
+void i2c_init(int fd){
+        i2c_send_command(fd, 0x33);     // Must initialize to 8-line mode at first
+        usleep(5000);
+        i2c_send_command(fd, 0x32);     // Then initialize to 4-line mode
+        usleep(5000);
+        i2c_send_command(fd, 0x28);     // 2 Lines & 5*7 dots
+        usleep(5000);
+        i2c_send_command(fd, 0x0C);     // Enable display without cursor
+        usleep(5000);
+        i2c_send_command(fd, 0x01);     // Clear Screen
+        usleep(5000);
+        i2c_write_word(fd, 0x08);
+}
 
-    textCommand( fd, 0x01 );        // clear display
-    usleep( 5000);
-    textCommand( fd, 0x08 | 0x04 ); // display on, no cursor
-    textCommand( fd, 0x28 );        // 2 lines
-    usleep( 5000 );
-    for (i=0; text[i] != '\0'; i++) {
-        if (text[i] == '\n') {
-            textCommand( fd, 0xc0 );
-	} else {
-            wiringPiI2CWriteReg8( fd, 0x3e, 0x40, text[i] );
-	}
-    }
+void i2c_clear(int fd){
+        i2c_send_command(fd, 0x01);     //clear Screen
+}
+
+void i2c_write(int fd, int x, int y, char data[]){
+        int addr, i;
+        int tmp;
+        if (x < 0)  x = 0;
+        if (x > 15) x = 15;
+        if (y < 0)  y = 0;
+        if (y > 3)  y = 3;
+
+        // Move cursor
+        if ( y < 2 ) {
+            addr = 0x80 + 0x40 * y + x;
+        } else {
+            addr = 0x80 + 0x40 * (y - 2) + 0x14 + x;
+        }
+        i2c_send_command(fd, addr);
+
+        tmp = strlen(data);
+        for (i = 0; i < tmp; i++){
+                i2c_send_data(fd, data[i]);
+        }
 }
 
 int i2c_lcd_test ( void )
@@ -398,31 +451,13 @@ int i2c_lcd_test ( void )
   
     // 0x62 is rgb, 0x3e is text
     fd = open( "/dev/i2c-2", O_RDWR );
-  
-    textCommand( fd, 0x01 );        // clear display
-    usleep( 5000 );
-    textCommand( fd, 0x08 | 0x04 ); // display on, no cursor
-    textCommand( fd, 0x28 );        // 2 lines
-    usleep( 5000 );
-  
-    set_backlight( fd, 255, 0, 0 );
-    for ( i=0; i<5; i++ )
-    {
-      set_backlight( fd, 255, 0, 0 );
-      sleep( 1 );
-      set_backlight( fd, 255, 255, 0 );
-      sleep( 1 ); 
-      set_backlight( fd, 0, 255, 0 );
-      sleep( 1 ); 
-      set_backlight( fd, 0, 255, 255 );
-      sleep( 1 ); 
-      set_backlight( fd, 0, 0, 255 );
-      sleep( 1 ); 
-      set_backlight( fd, 255, 0, 255 );
-      sleep( 1 ); 
-    }
-    set_backlight( fd, 128, 255, 0 );
-    setText( fd, "Hello world !\nIt works !\n" );
+ 
+    i2c_init(fd);
+    i2c_clear(fd);
+    i2c_write(fd, 4, 0, "Hello world !");
+    i2c_write(fd, 7, 1, "It works !"); 
+    i2c_write(fd, 3, 2, "This is a test.");
+    i2c_write(fd, 10, 3, "Bye !");
 
     close( fd );
     return 0;

@@ -1,9 +1,10 @@
 Build bookworm-gpio sdcard for orangepi 5 plus:
 
 Parts required for gpio tests:
-1. Seeed Grove starter kit LED, button, buzzer, Grove-LCD RGB Backlight V3.0 JHD1313M2.
+1. Seeed Grove starter kit LED, button, buzzer.
 2. Analog Servo.
 3. Adafruit SSD1306 128x32 SPI OLED Display.
+4. GeekPi LCM1604 I2C LCD Display with 4.7 k ohm pullup on sda and scl.
 
 The following 8 gpio tests are included: ( see below for tests summary )
 1. uart test
@@ -73,13 +74,13 @@ sudo cat /proc/device-tree/pwm@febf0020/status  ( pwm 14 )
 sudo cat /proc/device-tree/i2c@feaa0000/status  ( i2c-2 )
 sudo cat /proc/device-tree/spi@feb00000/status  ( spi-0 )
 
-sudo i2cdetect -y 2
+sudo i2cdetect -y 2  ( should detect only 0x27. If multiple address detected you need 4.7 K ohm pullup on sda and scl )
 
 -----------------------------------------------------------------------------
 
 Here are the summary of the gpio tests:
 
-These tests used Seeed Grove starter kit LED, button, buzzer, Grove-LCD RGB Backlight V3.0 JHD1313M2, Analog Servo and Adafruit SSD1306 128x32 SPI OLED Display.
+These tests used Seeed Grove starter kit LED, button, buzzer, GeekPi LCM1604 I2C LCD Display, Analog Servo and Adafruit SSD1306 128x32 SPI OLED Display.
 
 1. uart test.
    This test will send uart tx to uart rx for loopback.
@@ -108,8 +109,7 @@ These tests used Seeed Grove starter kit LED, button, buzzer, Grove-LCD RGB Back
    Connect gpio pin  9 to led ground.
 
 5. i2c lcd test.
-   This test will change lcd backlight color for 5 cycles.
-   Then it will display two sentences on lcd display.
+   This test will display 4 sentences on lcd display.
    Connect gpio pin  3 to lcd display SDA. ( i2c-2 ).
    Connect gpio pin  5 to lcd display SCL.
    Connect gpio pin  2 to lcd display 5V.

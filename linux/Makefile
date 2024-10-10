@@ -21,13 +21,13 @@ buildkernel:
 	sudo make ARCH=arm64 INSTALL_PATH=./tmp/boot install; \
 	sudo cp -r ../patches/extlinux ./tmp/boot
 	cd linux-rockchip/tmp/boot; \
+	sudo fdtoverlay -i ./dtb/rockchip/rk3588-orangepi-5-plus.dtb -o ./dtb/opi5plus.dtb ./dtb/rockchip/overlay/rk3588-uart3-m1.dtbo ./dtb/rockchip/overlay/rk3588-pwm14-m2.dtbo ./dtb/rockchip/overlay/rk3588-spi0-m2-cs0-spidev.dtbo ./dtb/rockchip/overlay/rk3588-i2c2-m0.dtbo; \
+	sudo mv ./dtb/opi5plus.dtb ./dtb/rockchip/rk3588-orangepi-5-plus.dtb; \
 	sudo touch initrd.img-6.1.75; \
 	sudo ln -s initrd.img-6.1.75 initrd.img; \
 	sudo ln -s vmlinuz-6.1.75 vmlinuz;
 
 postbuildkernel:
-	cd linux-rockchip/tmp/boot; \
-	sudo fdtoverlay -i ./dtb/rockchip/rk3588-orangepi-5-plus.dtb -o ./dtb/opi5plus.dtb ./dtb/rockchip/overlay/rk3588-uart3-m1.dtbo ./dtb/rockchip/overlay/rk3588-pwm14-m2.dtbo ./dtb/rockchip/overlay/rk3588-spi0-m2-cs0-spidev.dtbo ./dtb/rockchip/overlay/rk3588-i2c2-m0.dtbo;
 	cd linux-rockchip; \
 	\rm -f $(BOOT); \
 	mkfs.vfat -n "boot" -S 512 -C ${BOOT} 1024000; \

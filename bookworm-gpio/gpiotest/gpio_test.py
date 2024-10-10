@@ -14,9 +14,9 @@ port = "/dev/ttyS3"
 
 bus = smbus.SMBus(2)
 
-# this device has two I2C addresses
-DISPLAY_RGB_ADDR = 0x62
-DISPLAY_TEXT_ADDR = 0x3e
+# this device has I2C address
+LCD_ADDR = 0x27
+BLEN = 1
 
 spi = spidev.SpiDev()
 led = 32 
@@ -198,63 +198,105 @@ def servo():
     pwm_close()
 
 # I2C LCD
-# set backlight to (R,G,B) (values from 0..255 for each)
-def setRGB(r,g,b):
-    bus.write_byte_data(DISPLAY_RGB_ADDR,0,0)
-    bus.write_byte_data(DISPLAY_RGB_ADDR,1,0)
-    bus.write_byte_data(DISPLAY_RGB_ADDR,0x08,0xaa)
-    bus.write_byte_data(DISPLAY_RGB_ADDR,4,r)
-    bus.write_byte_data(DISPLAY_RGB_ADDR,3,g)
-    bus.write_byte_data(DISPLAY_RGB_ADDR,2,b)
+def i2c_write_word(data):
+        global LCD_ADDR
+        global BLEN
+        temp = data
+        if BLEN == 1:
+                temp |= 0x08
+        else:
+                temp &= 0xF7
+        bus.write_byte(LCD_ADDR ,temp)
 
-# send command to display (no need for external use)    
-def textCommand(cmd):
-    bus.write_byte_data(DISPLAY_TEXT_ADDR,0x80,cmd)
+def i2c_send_command(comm):
+        # Send bit7-4 firstly
+        buf = comm & 0xF0
+        buf |= 0x04               # RS = 0, RW = 0, EN = 1
+        i2c_write_word(buf)
+        time.sleep(0.002)
+        buf &= 0xFB               # Make EN = 0
+        i2c_write_word(buf)
 
-# set display text \n for second line(or auto wrap)     
-def setText(text):
-    textCommand(0x01) # clear display
-    time.sleep(.05)
-    textCommand(0x08 | 0x04) # display on, no cursor
-    textCommand(0x28) # 2 lines
-    time.sleep(.05)
-    count = 0
-    row = 0
-    for c in text:
-        if c == '\n' or count >= 16:
-            count = 0
-            row += 1
-            if row >= 2:
-                break
-            textCommand(0xc0)
-            if c == '\n':
-                continue
-        count += 1
-        bus.write_byte_data(DISPLAY_TEXT_ADDR,0x40,ord(c))
+        # Send bit3-0 secondly
+        buf = (comm & 0x0F) << 4
+        buf |= 0x04               # RS = 0, RW = 0, EN = 1
+        i2c_write_word(buf)
+        time.sleep(0.002)
+        buf &= 0xFB               # Make EN = 0
+        i2c_write_word(buf)
+
+def i2c_send_data(data):
+        # Send bit7-4 firstly
+        buf = data & 0xF0
+        buf |= 0x05               # RS = 1, RW = 0, EN = 1
+        i2c_write_word(buf)
+        time.sleep(0.002)
+        buf &= 0xFB               # Make EN = 0
+        i2c_write_word(buf)
+
+        # Send bit3-0 secondly
+        buf = (data & 0x0F) << 4
+        buf |= 0x05               # RS = 1, RW = 0, EN = 1
+        i2c_write_word(buf)
+        time.sleep(0.002)
+        buf &= 0xFB               # Make EN = 0
+        i2c_write_word(buf)
+
+def i2c_init():
+        global LCD_ADDR
+        try:
+                i2c_send_command(0x33) # Must initialize to 8-line mode at first
+                time.sleep(0.005)
+                i2c_send_command(0x32) # Then initialize to 4-line mode
+                time.sleep(0.005)
+                i2c_send_command(0x28) # 2 Lines & 5*7 dots
+                time.sleep(0.005)
+                i2c_send_command(0x0C) # Enable display without cursor
+                time.sleep(0.005)
+                i2c_send_command(0x01) # Clear Screen
+                bus.write_byte(LCD_ADDR, 0x08)
+        except:
+                return False
+        else:
+                return True
+
+def i2c_clear():
+        i2c_send_command(0x01) # Clear Screen
+
+def i2c_openlight():  # Enable the backlight
+        global LCD_ADDR
+        bus.write_byte(LCD_ADDR, 0x08)
+        bus.close()
+
+def i2c_write(x, y, str):
+        if x < 0:
+                x = 0
+        if x > 15:
+                x = 15
+        if y < 0:
+                y = 0
+        if y > 3:
+                y = 3
+
+        # Move cursor
+        if y < 2:
+            addr = 0x80 + 0x40 * y + x
+        else:
+            z = y - 2
+            addr = 0x80 + 0x40 * z + 0x14 + x
+
+        i2c_send_command(addr)
+
+        for chr in str:
+                i2c_send_data(ord(chr))
 
 def i2c_lcd_test():
-    textCommand(0x01) # clear display
-    time.sleep(.05)
-    textCommand(0x08 | 0x04) # display on, no cursor
-    textCommand(0x28) # 2 lines
-    time.sleep(.05)
-
-    for i in range(0,5):
-        setRGB( 255, 0, 0 )
-        time.sleep(1)
-        setRGB( 255, 255, 0 )
-        time.sleep(1)
-        setRGB( 0, 255, 0 )
-        time.sleep(1)
-        setRGB( 0, 255, 255 )
-        time.sleep(1)
-        setRGB( 0, 0, 255 )
-        time.sleep(1)
-        setRGB( 255, 0, 255 )
-        time.sleep(1)
-
-    setRGB( 128, 255, 0 )
-    setText( "Hello world !\nIt works !\n" )
+    i2c_init()
+    i2c_clear()
+    i2c_write(4, 0, 'Hello world !')
+    i2c_write(7, 1, 'It works !')
+    i2c_write(3, 2, 'This is a test.')
+    i2c_write(10,3, 'Bye !')
 
 # SPI OLED
 
