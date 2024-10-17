@@ -36,10 +36,10 @@ prebuild:
 	--linux-flavours none \
 	--linux-packages none \
 	--parent-mirror-binary 'http://deb.debian.org/debian/' \
-	--parent-mirror-binary-security 'http://security.debian.org/debian-security/' \
+	--parent-mirror-binary-security 'http://security.debian.org/debian-security/ bookworm-security main contrib non-free-firmware' \
 	--parent-mirror-bootstrap 'http://deb.debian.org/debian/' \
 	--parent-mirror-chroot 'http://deb.debian.org/debian/' \
-	--parent-mirror-chroot-security 'http://security.debian.org/debian-security/' \
+	--parent-mirror-chroot-security 'http://security.debian.org/debian-security/ bookworm-security main contrib non-free-firmware' \
 	--mode debian \
 	--security true \
 	--system normal

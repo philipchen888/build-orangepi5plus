@@ -98,9 +98,11 @@ systemctl enable rc-local
 systemctl enable resize-helper
 chsh -s /bin/bash linaro
 update-initramfs -c -k 6.1.75
+sync
 
 #---------------Clean--------------
 rm -rf /var/lib/apt/lists/*
+sync
 
 EOF
 

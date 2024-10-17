@@ -17,5 +17,5 @@ builduboot:
 	make clean; \
 	make ARCH=arm64 orangepi-5-plus-rk3588_defconfig; \
 	make -j$(nproc) HOSTLDLIBS_mkimage="-lssl -lcrypto"
-	cp ./u-boot/u-boot-rockchip-spi.bin ./out/u-boot-v2024.07-orangepi5-plus-spi.bin
+	cp ./u-boot/u-boot-rockchip-spi.bin ./out/u-boot-spi.bin
 

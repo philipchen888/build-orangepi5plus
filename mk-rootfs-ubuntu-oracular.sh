@@ -19,7 +19,7 @@ if [ ! $VERSION ]; then
 	VERSION="release"
 fi
 
-if [ ! -e live-image-arm64.tar.tar.gz ]; then
+if [ ! -e binary-tar.tar.gz ]; then
 	echo "\033[36m Run sudo lb build first \033[0m"
 fi
 
@@ -30,7 +30,7 @@ finish() {
 trap finish ERR
 
 echo -e "\033[36m Extract image \033[0m"
-sudo tar -xpf live-image-arm64.tar.tar.gz
+sudo tar -xpf binary-tar.tar.gz
 
 sudo cp -rf ../linux/linux-rockchip/tmp/lib/modules $TARGET_ROOTFS_DIR/lib
 sudo cp -rf ../linux/linux-rockchip/tmp/boot/* $TARGET_ROOTFS_DIR/boot
@@ -64,7 +64,7 @@ apt-get -y install libmali-g610-x11
 apt-get update
 apt-get upgrade -y
 apt-get -y dist-upgrade
-apt-get install -y build-essential git wget v4l-utils grub-efi-arm64 zstd
+apt-get install -y build-essential git wget grub-efi-arm64 zstd
 
 # Install and configure GRUB
 mkdir -p /boot/efi

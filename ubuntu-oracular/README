@@ -1,7 +1,7 @@
-Build ubuntu-noble sdcard for orangepi 5 plus:
+Build ubuntu-oracular sdcard for orangepi 5 plus:
 
-Input files: ../rootfs-ubuntu-noble/linaro-rootfs.img
-                                   /linaro-esp.img
+Input files: ../rootfs-ubuntu-oracular/linaro-rootfs.img
+                                      /linaro-esp.img
 
 Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
 sudo ./mksdcardimg.sh
@@ -29,7 +29,9 @@ date
 Check if Ubuntu is running UEFI mode:
 ls /sys/firmware/efi
 
-sudo apt install speedtest-cli python3-pip python3-setuptools ffmpeg mpv glmark2-es2-x11 glmark2-es2-wayland pandoc
+sudo apt install speedtest-cli python3-pip python3-setuptools ffmpeg glmark2-es2-x11 glmark2-es2-wayland pandoc snapd
+
+sudo snap install mpv
 
 speedtest-cli
 

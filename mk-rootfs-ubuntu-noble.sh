@@ -97,9 +97,11 @@ chmod +x /etc/rc.local
 systemctl enable rc-local
 systemctl enable resize-helper
 update-initramfs -c -k 6.1.75
+sync
 
 #---------------Clean--------------
 rm -rf /var/lib/apt/lists/*
+sync
 
 EOF
 

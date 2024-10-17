@@ -1,6 +1,6 @@
 Compile mainline kernel:
 
-wget https://github.com/Joshua-Riek/linux-rockchip/archive/refs/tags/Ubuntu-rockchip-6.1.0-1020.20.tar.gz
+wget https://github.com/Joshua-Riek/linux-rockchip/archive/refs/tags/Ubuntu-rockchip-6.1.0-1026.20.tar.gz
 tar -xzf Ubuntu-rockchip-6.1.0-1020.20.tar.gz
 mv linux-rockchip-Ubuntu-rockchip-6.1.0-1020.20 linux-rockchip
 

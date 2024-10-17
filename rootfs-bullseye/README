@@ -1,3 +1,5 @@
+Need to run on ubuntu jammy amd64 host.
+
 Compile rootfs:
 
 make rootfs

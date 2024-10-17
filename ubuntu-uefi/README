@@ -1,6 +1,6 @@
 Build ubuntu-uefi sdcard image for orangepi 5 plus.
 
-See ../uboot/README, burn u-boot-v2024.07-orangepi5-plus-spi.bin to orangepi5plus spi nor flash.
+See ../uboot/README, burn RK3588_NOR_FLASH.img to orangepi5plus spi nor flash.
 
 -----------------------------------------------------------
 Download Ubuntu iso.
@@ -9,10 +9,11 @@ Download Ubuntu iso.
 cd ~/Downloads
 wget https://cdimage.ubuntu.com/jammy/daily-live/20240908/jammy-desktop-arm64.iso
 wget https://cdimage.ubuntu.com/noble/daily-live/20240908/noble-desktop-arm64.iso
+wget https://cdimage.ubuntu.com/daily-live/current/oracular-desktop-arm64.iso
 
 -----------------------------------------------------------
 Prepare USB2 SATA SSD and NVMe SSD.
-Burn jammy(noble)-desktop-arm64.iso to USB2 SATA SSD
+Burn jammy(noble, oracular)-desktop-arm64.iso to USB2 SATA SSD
 -----------------------------------------------------------
 
 cd ~/build-orangepi5plus/ubuntu-uefi
@@ -22,7 +23,7 @@ sudo mkfs.vfat /dev/sda1
 sudo fdisk -l /dev/sda
 sudo mount -t vfat /dev/sda1 /mnt
 cd /mnt
-sudo 7z x ~/Downloads/jammy(noble)-desktop-arm64.iso
+sudo 7z x ~/Downloads/jammy(noble, oracular)-desktop-arm64.iso
 cd ~/build-orangepi5plus/ubuntu-uefi
 sync
 sudo umount /mnt
@@ -36,7 +37,7 @@ sudo fdisk -l /dev/sda
 Eject NVMe SSD from PC.
 
 ----------------------------------------------------------------------------
-Install Ubuntu to NVMe SSD using jammy(noble)-desktop-arm64.iso in USB2 SATA SSD.
+Install Ubuntu to NVMe SSD using jammy(noble, oracular)-desktop-arm64.iso in USB2 SATA SSD.
 ----------------------------------------------------------------------------
 
 Plugin the USB2 SATA SSD and NVMe SSD to orangepi5plus.
@@ -86,8 +87,22 @@ Package: *
 Pin: release o=LP-PPA-jjriek-rockchip-multimedia
 Pin-Priority: 1001
 )
-sudo add-apt-repository -y ppa:jjriek/panfork-mesa
+For ubuntu-jammy and ubuntu-noble:
+add-apt-repository -y ppa:jjriek/panfork-mesa
+sudo apt update
+Skip to next 'install mali-g610-firmware'
+
+For ubuntu-oracular:
+sudo vi /etc/apt/sources.list.d/panfork-mesa.list ( add
+deb http://ppa.launchpad.net/jjriek/panfork-mesa/ubuntu jammy main
+)
 sudo apt-get update
+gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv F02122ECF25FB4D7
+gpg --export --armor F02122ECF25FB4D7 | sudo apt-key add -
+sudo apt-key list
+sudo cp /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d
+
+sudo apt update
 sudo apt-get -y install mali-g610-firmware
 sudo apt-get -y dist-upgrade
 sudo apt-get -y install libmali-g610-x11
