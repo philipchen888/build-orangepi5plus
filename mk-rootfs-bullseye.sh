@@ -55,12 +55,12 @@ cat << EOF | sudo chroot $TARGET_ROOTFS_DIR
 rm -rf /etc/resolv.conf
 echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4" > /etc/resolv.conf
 resolvconf -u
-echo -e "deb http://ppa.launchpad.net/jjriek/panfork-mesa/ubuntu jammy main" > /etc/apt/sources.list.d/panfork-mesa.list
-apt-get update
+#echo -e "deb http://ppa.launchpad.net/jjriek/panfork-mesa/ubuntu jammy main" > /etc/apt/sources.list.d/panfork-mesa.list
+#apt-get update
 \rm -rf /etc/initramfs/post-update.d/z50-raspi-firmware
-apt-get -y install mali-g610-firmware
-apt-get -y dist-upgrade
-apt-get -y install libmali-g610-x11
+#apt-get -y install mali-g610-firmware
+#apt-get -y dist-upgrade
+#apt-get -y install libmali-g610-x11
 apt-get update
 apt-get upgrade -y
 apt-get -y dist-upgrade
