@@ -16,7 +16,8 @@ sync
 sudo umount /mnt
 Eject sdcard from PC.
 
-Plugin sdcard to orangepi 5 plus.
+Plugin sdcard and ethernet cable to orangepi 5 plus.
+Esc -> Boot Manager -> ( sdcard, emmc userdata or the last UEFI )
 Login:
 Username: linaro
 Password: linaro

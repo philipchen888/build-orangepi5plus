@@ -9,9 +9,11 @@ Parts needed:
 6. EMMC module.                  ( install android on EMMC )
 7. USB2 SATA SSD
 
-Note: Compile bullseye and ubuntu-jammy using host PC with ubuntu 22 (amd64 jammy).
-      Compile bookworm, ubuntu-noble, ubuntu-oracular using host PC with ubuntu 24 (amd64 noble).
- 
+Note: Compile debian and ubuntu-jammy using host PC with ubuntu 22 (amd64 jammy).
+      Compile ubuntu-noble and ubuntu-oracular using host PC with ubuntu 24 (amd64 noble).
+      Compile ubuntu-noble and ubuntu-oracular using lb version 3.0~a57-1.
+      Compile debian and ubuntu-jammy using lb version 20230502.
+
 Steps to build orangepi5plus sdcard image:
 
 1. git clone https://github.com/philipchen888/build-orangepi5plus.git
@@ -59,24 +61,16 @@ Steps to build orangepi5plus sdcard image:
                       ./linux-rockchip/tmp/boot/*
 
 5. cd ~/build-orangepi5plus/rootfs-bullseye  ( Compile debian bullseye rootfs )
-   Need to run on ubuntu jammy amd64 host.
-   make rootfs        ( has desktop )
+   make rootfs
    The results are in ./linaro-rootfs.img linaro-esp.img
-
-   make basicrootfs   ( no desktop )
-   The results are in ./linaro-basicrootfs.img linaro-esp.img
    make clean
 
 6. cd ~/build-orangepi5plus/rootfs-bookworm  ( Compile debian bookworm rootfs )
-   make rootfs        ( has desktop )
+   make rootfs
    The results are in ./linaro-rootfs.img linaro-esp.img
-
-   make basicrootfs   ( no desktop )
-   The results are in ./linaro-basicrootfs.img linaro-esp.img
    make clean
 
 7. cd ~/build-orangepi5plus/rootfs-ubuntu-jammy  ( Compile debian ubuntu-jammy rootfs )
-   Need to run on ubuntu jammy amd64 host.
    make rootfs
    The results are in ./linaro-rootfs.img linaro-esp.img
    make clean
@@ -91,64 +85,44 @@ Steps to build orangepi5plus sdcard image:
    The results are in ./linaro-rootfs.img linaro-esp.img
    make clean
 
-10. cd ~/build-orangepi5plus/bullseye-lxde  ( Build debian bullseye lxde-desktop image )
-    Need to run on ubuntu jammy amd64 host.
-    Input files: ../rootfs-bullseye/linaro-rootfs.img linaro-esp.img
+10. cd ~/build-orangepi5plus/bullseye-gnome  ( Build debian bullseye gnome-desktop image )
     Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
     sudo ./mksdcardimg.sh
     Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-11. cd ~/build-orangepi5plus/bookworm-lxde  ( Build debian bookworm lxde-desktop image )
-    Input files: ../rootfs-bookworm/linaro-rootfs.img linaro-esp.img
+11. cd ~/build-orangepi5plus/bookworm-gnome  ( Build debian bookworm gnome-desktop image )
     Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
     sudo ./mksdcardimg.sh
     Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-12. cd ~/build-orangepi5plus/bullseye-xfce-kde-gnome ( Build bullseye xfce-kde-gnome desktop image )
-    Need to run on ubuntu jammy amd64 host.
-    Input files: ../rootfs-bullseye/linaro-basicrootfs.img linaro-esp.img
+12. cd ~/build-orangepi5plus/ubuntu-jammy  ( Build ubuntu-jammy image )
     Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
     sudo ./mksdcardimg.sh
     Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-13. cd ~/build-orangepi5plus/bookworm-xfce-kde-gnome ( Build bookworm xfce-kde-gnome desktop image )
-    Input files: ../rootfs-bookworm/linaro-basicrootfs.img linaro-esp.img
+13. cd ~/build-orangepi5plus/ubuntu-noble  ( Build ubuntu-noble image )
     Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
     sudo ./mksdcardimg.sh
     Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-14. cd ~/build-orangepi5plus/ubuntu-jammy  ( Build ubuntu-jammy image )
-    Need to run on ubuntu jammy amd64 host.
-    Input files: ../rootfs-ubuntu-jammy/linaro-rootfs.img linaro-esp.img
+14. cd ~/build-orangepi5plus/ubuntu-oracular  ( Build ubuntu-oracular image )
     Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
     sudo ./mksdcardimg.sh
     Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-15. cd ~/build-orangepi5plus/ubuntu-noble  ( Build ubuntu-noble image )
-    Input files: ../rootfs-ubuntu-noble/linaro-rootfs.img linaro-esp.img
-    Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
-    sudo ./mksdcardimg.sh
-    Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
+15. cd ~/build-orangepi5plus/android       ( Build android image )
 
-16. cd ~/build-orangepi5plus/android       ( Build android image )
+16. cd ~/build-orangepi5plus/bookworm-flightaware  ( flightaware in bookworm-lxde )
 
-17. cd ~/build-orangepi5plus/bookworm-flightaware  ( flightaware in bookworm-lxde )
+17. cd ~/build-orangepi5plus/yocto-xfce    ( Build yocto xfce-desktop image )
 
-18. cd ~/build-orangepi5plus/yocto-xfce    ( Build yocto xfce-desktop image )
+18. cd ~/build-orangepi5plus/buildroot     ( Build buildroot image )
 
-19. cd ~/build-orangepi5plus/buildroot     ( Build buildroot image )
+19. cd ~/build-orangepi5plus/bookworm-uefi ( Build bookworm uefi image )
 
-20. cd ~/build-orangepi5plus/bookworm-uefi ( Build bookworm uefi image )
-
-21. cd ~/build-orangepi5plus/ubuntu-uefi   ( Build ubuntu jammy/noble uefi images )
+20. cd ~/build-orangepi5plus/ubuntu-uefi   ( Build ubuntu jammy/noble uefi images )
     Install Ubuntu to NVMe SSD using jammy(noble)-desktop-arm64.iso in USB2 SATA SSD.
 
-22. cd ~/build-orangepi5plus/bookworm-gpio ( Build bookworm gpio tests )
+21. cd ~/build-orangepi5plus/bookworm-gpio ( Build bookworm gpio tests )
 
-23. cd ~/build-orangepi5plus/fedora        ( Build fedora 40 image )
-
-24. cd ~/build-orangepi5plus/ubuntu-oracular ( Build ubuntu-oracular image )
-    Input files: ../rootfs-ubuntu-oracular/linaro-rootfs.img linaro-esp.img
-    Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
-    sudo ./mksdcardimg.sh
-    Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
+22. cd ~/build-orangepi5plus/fedora        ( Build fedora 40 image )

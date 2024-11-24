@@ -7,7 +7,8 @@ Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
 sudo ./mksdcardimg.sh
 Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to SBC
+Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD and ethernet cable to SBC
+Esc -> Boot Manager -> ( sdcard, emmc userdata or the last UEFI )
 Run setup
 Login:
 Username: linaro
@@ -28,18 +29,25 @@ glxinfo | grep OpenGL
 date
 Check if Ubuntu is running UEFI mode:
 ls /sys/firmware/efi
+Check display mode: ( wayland or x11 )
+echo $XDG_SESSION_TYPE
+Check audio driver: ( pulseaudio or pipewire )
+pactl info
 
-sudo apt install speedtest-cli libjpeg-dev pkg-config libpng-dev libpng16-16 libdrm-dev libgbm-dev libwayland-dev wayland-protocols glmark2-es2 glmark2-es2-wayland python3-pip python3-setuptools ffmpeg mpv pandoc
+sudo apt install speedtest-cli python3-pip python3-setuptools ffmpeg mpv glmark2-es2 glmark2-es2-wayland pandoc
 
-speedtest-cli
+speedtest-cli --secure
 
-glmark2-es2-wayland
-glmark2-es2
+glmark2-es2-wayland   ( for wayland )
+glmark2-es2           ( for x11 )
 
 aplay -l
 pavucontrol  ( select card 2 rockchip-hdmi0 as default )
 
-Chromium -> youtube.com -> search YmDNhi07_Ho
+sudo add-apt-repository ppa:mozillateam/ppa
+sudo apt update
+sudo apt install firefox-esr
+firefox-esr -> youtube.com -> search YmDNhi07_Ho
 
 git clone https://github.com/yt-dlp/yt-dlp.git
 cd yt-dlp

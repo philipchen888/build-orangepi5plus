@@ -50,4 +50,4 @@ fi
 ssh-keygen -A
 
 # Enable wayland session
-sed -i 's/#WaylandEnable=false/WaylandEnable=true/g' /etc/gdm3/custom.conf
+# sed -i 's/#WaylandEnable=false/WaylandEnable=true/g' /etc/gdm3/custom.conf

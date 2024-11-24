@@ -24,7 +24,10 @@ if [ ! -e live-image-arm64.tar.tar.gz ]; then
 fi
 
 finish() {
-	sudo umount $TARGET_ROOTFS_DIR/dev
+	sudo umount -lf $TARGET_ROOTFS_DIR/proc || true
+	sudo umount -lf $TARGET_ROOTFS_DIR/sys || true
+	sudo umount -lf $TARGET_ROOTFS_DIR/dev/pts || true
+	sudo umount -lf $TARGET_ROOTFS_DIR/dev || true
 	exit -1
 }
 trap finish ERR
@@ -94,6 +97,9 @@ update-grub
 chmod o+x /usr/lib/dbus-1.0/dbus-daemon-launch-helper
 chmod +x /etc/rc.local
 
+# Disable wayland session
+sed -i 's/#WaylandEnable=false/WaylandEnable=false/g' /etc/gdm3/daemon.conf
+
 systemctl enable rc-local
 systemctl enable resize-helper
 update-initramfs -c -k 6.1.75
@@ -102,10 +108,10 @@ sync
 #---------------Clean--------------
 rm -rf /var/lib/apt/lists/*
 sync
-
 EOF
 
-sudo umount $TARGET_ROOTFS_DIR/proc
-sudo umount $TARGET_ROOTFS_DIR/sys
-sudo umount $TARGET_ROOTFS_DIR/dev/pts
-sudo umount $TARGET_ROOTFS_DIR/dev
+sudo umount -lf $TARGET_ROOTFS_DIR/proc || true
+sudo umount -lf $TARGET_ROOTFS_DIR/sys || true
+sudo umount -lf $TARGET_ROOTFS_DIR/dev/pts || true
+sudo umount -lf $TARGET_ROOTFS_DIR/dev || true
+sync
