@@ -32,7 +32,7 @@ echo $XDG_SESSION_TYPE
 Check audio driver: ( pulseaudio or pipewire )
 pactl info
 
-sudo apt install speedtest-cli build-essential libjpeg-dev libpng-dev libpng16-16 pkg-config libx11-dev python3-pip python3-setuptools chromium chromium-sandbox ffmpeg mpv git pandoc
+sudo apt install speedtest-cli build-essential libjpeg-dev libpng-dev libpng16-16 pkg-config libx11-dev python3-pip python3-setuptools ffmpeg mpv git pandoc firefox-esr
 
 speedtest-cli --secure
 
@@ -41,12 +41,14 @@ cd glmark2
 ./waf configure --with-flavors=x11-glesv2
 ./waf
 sudo ./waf install
+cd ../
+
 glmark2-es2
 
 aplay -l
 pavucontrol  ( select card 2 rockchip-hdmi0 as default )
 
-Chromium -> youtube.com -> search YmDNhi07_Ho
+firefox -> youtube.com -> search YmDNhi07_Ho
 
 git clone https://github.com/yt-dlp/yt-dlp.git
 cd yt-dlp

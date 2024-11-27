@@ -1,1 +1,2 @@
 deb http://ppa.launchpad.net/jjriek/rockchip/ubuntu jammy main
+deb-src http://ppa.launchpad.net/jjriek/rockchip/ubuntu jammy main

@@ -78,6 +78,13 @@ cp /boot/40_custom_uuid /etc/grub.d/
 chmod +x /etc/grub.d/40_custom_uuid
 rm -rf /boot/40_custom_uuid
 
+# Fix mouse lagging issue
+cat << MOUSE_EOF >> /etc/environment
+MUTTER_DEBUG_ENABLE_ATOMIC_KMS=0
+MUTTER_DEBUG_FORCE_KMS_MODE=simple
+CLUTTER_PAINT=disable-dynamic-max-render-time
+MOUSE_EOF
+
 # Migrate extlinux.conf to GRUB
 rm -rf /boot/extlinux
 cat << GRUB_EOF > /etc/default/grub

@@ -140,7 +140,7 @@ gnome-icon-theme
 gnome-settings-daemon
 libproxy1-plugin-networkmanager
 network-manager-gnome
-xfce4-power-manager-plugins
+#xfce4-power-manager-plugins
 pkg-kde-tools
 lightdm-gtk-greeter
 xdg-desktop-portal
@@ -158,3 +158,12 @@ wireplumber
 pipewire-pulse
 pipewire-audio-client-libraries
 pulseaudio-utils
+gdm3
+#mutrace
+xdg-user-dirs-gtk
+#rockchip-multimedia-config
+#linux-firmware
+#oem-config-gtk
+#gstreamer1.0-rockchip1
+#libv4l-rkmpp
+#localechooser-data
