@@ -49,7 +49,7 @@ pavucontrol  ( select hdmi0 as default )
 sudo add-apt-repository ppa:mozillateam/ppa
 sudo apt update
 sudo apt install firefox-esr
-firefox-esr -> youtube.com -> search YmDNhi07_Ho
+firefox -> youtube.com -> search YmDNhi07_Ho
 
 git clone https://github.com/yt-dlp/yt-dlp.git
 cd yt-dlp

@@ -58,12 +58,7 @@ cat << EOF | sudo chroot $TARGET_ROOTFS_DIR
 rm -rf /etc/resolv.conf
 echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4" > /etc/resolv.conf
 resolvconf -u
-#echo -e "deb http://ppa.launchpad.net/jjriek/panfork-mesa/ubuntu jammy main" > /etc/apt/sources.list.d/panfork-mesa.list
-#apt-get update
 \rm -rf /etc/initramfs/post-update.d/z50-raspi-firmware
-#apt-get -y install mali-g610-firmware
-#apt-get -y dist-upgrade
-#apt-get -y install libmali-g610-x11
 apt-get update
 apt-get upgrade -y
 apt-get -y dist-upgrade
@@ -77,6 +72,13 @@ update-grub
 cp /boot/40_custom_uuid /etc/grub.d/
 chmod +x /etc/grub.d/40_custom_uuid
 rm -rf /boot/40_custom_uuid
+
+# Fix mouse lagging issue
+cat << MOUSE_EOF >> /etc/environment
+MUTTER_DEBUG_ENABLE_ATOMIC_KMS=0
+MUTTER_DEBUG_FORCE_KMS_MODE=simple
+CLUTTER_PAINT=disable-dynamic-max-render-time
+MOUSE_EOF
 
 # Migrate extlinux.conf to GRUB
 rm -rf /boot/extlinux
