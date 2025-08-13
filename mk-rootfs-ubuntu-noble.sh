@@ -35,9 +35,12 @@ trap finish ERR
 echo -e "\033[36m Extract image \033[0m"
 sudo tar -xpf binary-tar.tar.gz
 
-sudo cp -rf ../linux/linux-rockchip/tmp/lib/modules $TARGET_ROOTFS_DIR/lib
-sudo cp -rf ../linux/linux-rockchip/tmp/boot/* $TARGET_ROOTFS_DIR/boot
-sudo cp ../linux/patches/40_custom_uuid $TARGET_ROOTFS_DIR/boot
+sudo cp -rf ../kernel/linux-rockchip/tmp/lib/modules $TARGET_ROOTFS_DIR/lib
+sudo cp -rf ../kernel/linux-rockchip/tmp/boot/* $TARGET_ROOTFS_DIR/boot
+export KERNEL_VERSION=$(ls $TARGET_ROOTFS_DIR/boot/vmlinuz-* 2>/dev/null | sed 's|.*/vmlinuz-||' | sort -V | tail -n 1)
+echo $KERNEL_VERSION
+sudo sed -e "s/6.16.0/$KERNEL_VERSION/g" < ../kernel/patches/40_custom_uuid | sudo tee $TARGET_ROOTFS_DIR/boot/40_custom_uuid > /dev/null
+cat $TARGET_ROOTFS_DIR/boot/40_custom_uuid
 
 # overlay folder
 sudo cp -rf ../overlay/* $TARGET_ROOTFS_DIR/
@@ -106,7 +109,7 @@ chmod +x /etc/rc.local
 
 systemctl enable rc-local
 systemctl enable resize-helper
-update-initramfs -c -k 6.1.75
+update-initramfs -c -k $KERNEL_VERSION
 sync
 
 #---------------Clean--------------

@@ -35,9 +35,13 @@ trap finish ERR
 echo -e "\033[36m Extract image \033[0m"
 sudo tar -xpf live-image-arm64.tar.tar.gz
 
-sudo cp -rf ../linux/linux-rockchip/tmp/lib/modules $TARGET_ROOTFS_DIR/lib
-sudo cp -rf ../linux/linux-rockchip/tmp/boot/* $TARGET_ROOTFS_DIR/boot
-sudo cp ../linux/patches/40_custom_uuid $TARGET_ROOTFS_DIR/boot
+sudo cp -rf ../kernel/linux-rockchip/tmp/lib/modules $TARGET_ROOTFS_DIR/lib
+sudo cp -rf ../kernel/linux-rockchip/tmp/boot/* $TARGET_ROOTFS_DIR/boot
+export KERNEL_VERSION=$(ls $TARGET_ROOTFS_DIR/boot/vmlinuz-* 2>/dev/null | sed 's|.*/vmlinuz-||' | sort -V | tail -n 1)
+echo $KERNEL_VERSION
+sudo sed -e "s/6.16.0/$KERNEL_VERSION/g" < ../kernel/patches/40_custom_uuid | sudo tee $TARGET_ROOTFS_DIR/boot/40_custom_uuid > /dev/null
+cat $TARGET_ROOTFS_DIR/boot/40_custom_uuid
+for key in AEBDF4819BE21867 9BDB3D89CE49EC21 8065BE1FC67AABDE F02122ECF25FB4D7; do gpg --keyserver keyserver.ubuntu.com --recv-keys $key && gpg --export $key | sudo tee -a $TARGET_ROOTFS_DIR/etc/apt/trusted.gpg.d/custom-keys.gpg > /dev/null; done
 
 # overlay folder
 sudo cp -rf ../overlay/* $TARGET_ROOTFS_DIR/
@@ -62,12 +66,10 @@ resolvconf -u
 echo -e "deb http://ppa.launchpad.net/jjriek/panfork-mesa/ubuntu jammy main\ndeb http://ppa.launchpad.net/mozillateam/ppa/ubuntu jammy main" > /etc/apt/sources.list.d/panfork-mesa.list
 apt-get update
 \rm -rf /etc/initramfs/post-update.d/z50-raspi-firmware
-apt-get -y install mali-g610-firmware
-apt-get -y dist-upgrade
-apt-get -y install libmali-g610-x11
+apt-get install -y mali-g610-firmware libmali-g610-x11
 apt-get update
 apt-get upgrade -y
-apt-get -y dist-upgrade
+apt-get dist-upgrade -y
 apt-get install -y build-essential git wget v4l-utils grub-efi-arm64 zstd
 
 # Install and configure GRUB
@@ -86,8 +88,6 @@ MUTTER_DEBUG_FORCE_KMS_MODE=simple
 CLUTTER_PAINT=disable-dynamic-max-render-time
 MOUSE_EOF
 
-# Migrate extlinux.conf to GRUB
-rm -rf /boot/extlinux
 cat << GRUB_EOF > /etc/default/grub
 GRUB_DEFAULT="Boot from UUID"
 GRUB_TIMEOUT=5
@@ -105,10 +105,16 @@ update-grub
 chmod o+x /usr/lib/dbus-1.0/dbus-daemon-launch-helper
 chmod +x /etc/rc.local
 
+# Create the linaro user account
+/usr/sbin/useradd -d /home/linaro -G adm,sudo,video -m -N -u 29999 linaro
+echo -e "linaro:linaro" | chpasswd
+echo -e "linaro-alip" | tee /etc/hostname
+
 systemctl enable rc-local
 systemctl enable resize-helper
+systemctl enable bluetooth.service
 chsh -s /bin/bash linaro
-update-initramfs -c -k 6.1.75
+update-initramfs -c -k $KERNEL_VERSION
 sync
 
 #---------------Clean--------------

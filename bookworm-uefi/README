@@ -3,11 +3,11 @@ Build bookworm-uefi sdcard image for orangepi-5-plus.
 See ../uboot/README, burn RK3588_NOR_FLASH.img to orangepi5plus spi nor flash.
 
 ------------------------------------------------------
-Download debian-12.7.0-arm64-netinst.iso
+Download debian-12.11.0-arm64-netinst.iso
 ------------------------------------------------------
 
 cd ~/Downloads
-wget https://cdimage.debian.org/debian-cd/current/arm64/iso-cd/debian-12.7.0-arm64-netinst.iso
+wget https://cdimage.debian.org/debian-cd/current/arm64/iso-cd/debian-12.11.0-arm64-netinst.iso
 
 ------------------------------------------------------
 Burn iso to USB2 sata ssd
@@ -20,7 +20,7 @@ sudo mkfs.vfat /dev/sda1
 sudo fdisk -l /dev/sda
 sudo mount -t vfat /dev/sda1 /mnt
 cd /mnt
-sudo 7z x ~/Downloads/debian-12.7.0-arm64-netinst.iso
+sudo 7z x ~/Downloads/debian-12.11.0-arm64-netinst.iso
 cd ~/build-orangepi5plus/bookworm-uefi
 sync
 sudo umount /mnt
@@ -30,19 +30,19 @@ Eject USB2 sata ssd from PC.
 Install debian bookworm to USB2 sata ssd.
 -----------------------------------------------------
 
-Plugin USB2 sata ssd to orangepi-5-plus USB2 port. Plugin ethernet cable to orangepi-5-plus. Plugin HDMI cable to hdmi0 port. Power on orangepi-5-plus.
-Escape -> continue -> install
-ethernet hardware select the second one.
-User name: linaro
+Plugin USB2 sata ssd to orangepi-5-plus USB2 port. Plugin wifi usb dongle to orangepi-5-plus. Plugin HDMI cable to hdmi0 port ( middle one ). Power on orangepi-5-plus.
+Select install
+loading missing firmware? No
 Select debian desktop and gnome in addition to ssh and standard system utilities.
+User name: linaro
 
-Disable power saving and screen saver.
+Disable power saving, turn off auto suspend and screen saver.
 su -
-usermod -aG sudo linaro
-shutdown -h now     ( prepare to install PPA-jjriek-rockchip )
+usermod -aG adm,sudo,video linaro
+shutdown -h now    ( prepare to install PPA-jjriek-rockchip )
 
 Plugin USB2 sata ssd to PC.
-cp ~/build-orangepi5plus/bookworm-uefi/patches/config-6.1.0-1020-rockchip /media/$USER/*/home/linaro 
+cp ~/build-orangepi5plus/bookworm-uefi/patches/config-6.1.0-1020-rockchip /media/$USER/*/home/linaro
 cd /media/$USER/*/etc/apt/preferences.d
 sudo vi extra-ppas.pref ( add
 Package: *
@@ -56,33 +56,48 @@ Pin-Priority: 1001
 cd ~/
 sudo vi /media/$USER/*/etc/apt/sources.list ( add
 deb http://ppa.launchpad.net/jjriek/panfork-mesa/ubuntu jammy main
+deb http://ppa.launchpad.net/mozillateam/ppa/ubuntu jammy main
+)
+sudo vi /media/$USER/*/etc/environment ( add
+MUTTER_DEBUG_ENABLE_ATOMIC_KMS=0
+MUTTER_DEBUG_FORCE_KMS_MODE=simple
+CLUTTER_PAINT=disable-dynamic-max-render-time
 )
 sync
 sudo umount /media/$USER/*
 Eject USB2 sata ssd from PC. Plugin USB2 sata ssd to orangepi-5-plus.
 
 Power on orangepi-5-plus.
+sudo apt install openssh-server net-tools
 uname -a
 lsb_release -a
-sudo apt install net-tools
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys AEBDF4819BE21867 9BDB3D89CE49EC21 8065BE1FC67AABDE F02122ECF25FB4D7
+sudo mv /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d
+sudo apt update; sudo apt upgrade; sudo apt install pulseaudio-utils;
+Check if Debian is running UEFI mode:
+ls /sys/firmware/efi
+Check display mode: ( wayland or x11 )
+echo $XDG_SESSION_TYPE
+Check audio driver: ( pulseaudio or pipewire )
+pactl info
 
-sudo apt update 
-gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv F02122ECF25FB4D7
-gpg --export --armor F02122ECF25FB4D7 | sudo apt-key add -
-sudo apt-key list
-sudo cp /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d
-sudo apt update
-sudo apt upgrade
-sudo apt-get -y install mali-g610-firmware
-sudo apt-get -y dist-upgrade
-sudo apt-get -y install libmali-g610-x11
+sudo apt install build-essential speedtest-cli python3-pip python3-setuptools ffmpeg mpv glmark2-es2 pandoc vlc vlc-plugin-video-output pavucontrol rfkill
+
+speedtest-cli --secure
+
+glmark2-es2
+
+aplay -l
+sudo rfkill list
+
+mainline kernel 6.1.0-37-arm64 doesn't support opi5+ sound, bluetooth, ethernet.
+
 sudo apt-get update
+sudo apt-get install -y mali-g610-firmware libmali-g610-x11
+sudo apt-get update 
 sudo apt-get upgrade -y
-sudo apt-get -y dist-upgrade
+sudo apt-get dist-upgrade -y
 sudo apt-get install -y build-essential git wget v4l-utils glmark2-es2 vsftpd
-
-sudo vi /etc/vsftpd.conf ( anonymous_enable=NO, local_enable=YES, write_enable=YES )
-sudo systemctl restart vsftpd
 
 sync
 sudo reboot
@@ -92,54 +107,87 @@ sudo apt install libncurses-dev libelf-dev flex bison libssl-dev speedtest-cli l
 speedtest-cli
 glmark2-es2
 
-Compile custom kernel from source:
-wget https://github.com/Joshua-Riek/linux-rockchip/archive/refs/tags/Ubuntu-rockchip-6.1.0-1020.20.tar.gz
-tar -xzf Ubuntu-rockchip-6.1.0-1020.20.tar.gz
-mv linux-rockchip-Ubuntu-rockchip-6.1.0-1020.20 linux-rockchip
-cp config-6.1.0-1020-rockchip ./linux-rockchip/arch/arm64/configs/defconfig
+----------------------------------------------------
+Compile vendor kernel 6.1.75+
+----------------------------------------------------
+
+sudo apt install git cmake device-tree-compiler libfdt-dev build-essential libncurses-dev bison flex libssl-dev libelf-dev fakeroot
+
+git clone --depth=1 -b Ubuntu-rockchip-6.1.0-1020.20 https://github.com/Joshua-Riek/linux-rockchip.git
+cp ./config-6.1.0-1020-rockchip ./linux-rockchip/arch/arm64/configs/defconfig
 cd linux-rockchip
 sudo make mrproper
 make ARCH=arm64 defconfig
-make ARCH=arm64 -j8   ( Don't use ssh. Run this command directly from orangepi 5 plus terminal. It may take 2 hours )
+make ARCH=arm64 -j$(nproc)   ( It may take 2 hours )
 sudo make ARCH=arm64 modules_install
 sudo make ARCH=arm64 dtbs_install
 sudo make ARCH=arm64 install
+
+cd ../
+ls -la /boot
+sudo e2label /dev/sda2 rootfs
+sudo blkid /dev/sda2   ( look for LABEL and UUID )
 
 sudo vi /etc/grub.d/40_custom_uuid ( add
 #!/bin/sh
 exec tail -n +3 $0
 
 menuentry "Boot from UUID" {
-    search --no-floppy --fs-uuid --set=root 9c684b63-627e-48f5-94ac-cf2920813dfb
-    echo    'Loading Linux 6.1.75-arm64 ...'
-    linux /boot/vmlinuz-6.1.75 root=UUID=9c684b63-627e-48f5-94ac-cf2920813dfb rootwait rw
+    search --no-floppy --fs-uuid --set=root 2ae29122-30c1-4153-b9e8-9235324e52f7
+    echo    'Loading Linux 6.1.75+ ...'
+    linux /boot/vmlinuz-6.1.75+ root=UUID=2ae29122-30c1-4153-b9e8-9235324e52f7 rootwait rw
     echo    'Loading initial ramdisk ...'
-    initrd /boot/initrd.img-6.1.75
+    initrd /boot/initrd.img-6.1.75+
     echo    'Loading rk3588-orangepi-5-plus.dtb'
-    devicetree /boot/dtbs/6.1.75/rockchip/rk3588-orangepi-5-plus.dtb
+    devicetree /boot/dtbs/6.1.75+/rockchip/rk3588-orangepi-5-plus.dtb
 }
 )
+
+Note: change the above UUID to real UUID like: b3adbe54-ab88-4da5-a9a6-08cf87a09d69
+
 sudo chmod +x /etc/grub.d/40_custom_uuid
+
 sudo vi /etc/default/grub ( change GRUB_DEFAULT=0 to GRUB_DEFAULT="Boot from UUID" )
 sudo update-grub  ( generate grub.cfg )
 cd ~/
 sync
 sudo shutdown -h now
-Power on orangepi-5-plus.
+
+Unplug wifi dongle. Plugin ethernet cable to orangepi-5-plus. Power on orangepi-5-plus.
 
 uname -a
 lsb_release -a
 
-glmark2-es2
+date
+Check if Debian is running UEFI mode:
+ls /sys/firmware/efi
+Check display mode: ( wayland or x11 )
+echo $XDG_SESSION_TYPE
+Check audio driver: ( pulseaudio or pipewire )
+pactl info
+
+sudo apt install curl git zip rfkill speedtest-cli python3-pip python3-setuptools ffmpeg mpv glmark2-es2-wayland pandoc firefox-esr vlc vlc-plugin-video-output
+
+speedtest-cli --secure
+
+glmark2-es2-wayland
 
 aplay -l
-pavucontrol  ( select card2 hdmi0 as default )
+pavucontrol  ( select card0 hdmi0 as default )
 
-Chromium -> youtube.com -> search YmDNhi07_Ho
+firefox -> youtube -> search YmDNhi07_Ho
 
 git clone https://github.com/yt-dlp/yt-dlp.git
 cd yt-dlp
 make
 cd ../
-~/yt-dlp/yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]' 3qrKjywjo7Q -o swan.mp4
-mpv swan.mp4
+~/yt-dlp/yt-dlp -f 'bestvideo[ext=mp4][protocol=https]+bestaudio[ext=m4a][protocol=https]' 3qrKjywjo7Q -o swan.mp4
+mpv --hwdec=auto-copy --log-file=mpv.log swan.mp4
+grep Using mpv.log
+cvlc --gl=wgl --glconv=any swan.mp4
+
+Plugin ASUS USB-BT500 bluetooth usb dongle to rpi5.
+sudo rfkill list
+hciconfig hci0
+hcitool dev
+hciconfig -a

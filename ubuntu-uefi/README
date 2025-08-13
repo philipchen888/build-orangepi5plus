@@ -7,13 +7,12 @@ Download Ubuntu iso.
 -----------------------------------------------------------
 
 cd ~/Downloads
-wget https://cdimage.ubuntu.com/jammy/daily-live/20240908/jammy-desktop-arm64.iso
-wget https://cdimage.ubuntu.com/noble/daily-live/20240908/noble-desktop-arm64.iso
-wget https://cdimage.ubuntu.com/daily-live/current/oracular-desktop-arm64.iso
+wget https://cdimage.ubuntu.com/releases/plucky/release/ubuntu-25.04-desktop-arm64.iso
+wget https://cdimage.ubuntu.com/releases/noble/release/ubuntu-24.04.3-desktop-arm64.iso
 
 -----------------------------------------------------------
 Prepare USB2 SATA SSD and NVMe SSD.
-Burn jammy(noble, oracular)-desktop-arm64.iso to USB2 SATA SSD
+Burn ubuntu-25.04-desktop-arm64.iso to USB2 SATA SSD
 -----------------------------------------------------------
 
 cd ~/build-orangepi5plus/ubuntu-uefi
@@ -23,7 +22,7 @@ sudo mkfs.vfat /dev/sda1
 sudo fdisk -l /dev/sda
 sudo mount -t vfat /dev/sda1 /mnt
 cd /mnt
-sudo 7z x ~/Downloads/jammy(noble, oracular)-desktop-arm64.iso
+sudo 7z x ~/Downloads/ubuntu-25.04-desktop-arm64.iso
 cd ~/build-orangepi5plus/ubuntu-uefi
 sync
 sudo umount /mnt
@@ -37,7 +36,7 @@ sudo fdisk -l /dev/sda
 Eject NVMe SSD from PC.
 
 ----------------------------------------------------------------------------
-Install Ubuntu to NVMe SSD using jammy(noble, oracular)-desktop-arm64.iso in USB2 SATA SSD.
+Install Ubuntu to NVMe SSD using ubuntu-25.04-desktop-arm64.iso in USB2 SATA SSD.
 ----------------------------------------------------------------------------
 
 Plugin the USB2 SATA SSD and NVMe SSD to orangepi5plus.
@@ -53,24 +52,33 @@ Plugin NVMe SSD to orangepi5plus. Plugin ethernet cable to orangepi5plus.
 Power on orangepi5plus.
 Disable power saving and screen saver.
 
+sudo apt install net-tools openssh-server
+sudo ifconfig
 df .
 uname -a
 lsb_release -a
 date
 sudo apt update
 sudo apt upgrade
+sudo apt dist-upgrade
 sync
-sudo apt install net-tools openssh-server
-sudo ifconfig
+
+sudo apt install glmark2-es2-wayland speedtest-cli
 
 Check if Ubuntu is running UEFI mode:
 ls /sys/firmware/efi
 
+speedtest-cli --secure
+aplay -l
+glmark2-es2-wayland
+
+mainline kernel 6.14.0-27-generic cannot support opi5+ sound, gpu
+
 ---------------------------------------------------------------------
-Compile and install custom kernel
+Compile and install vendor kernel 6.1.75+
 ---------------------------------------------------------------------
 
-sudo apt install flex bison libelf-dev libssl-dev build-essential libncurses-dev git speedtest-cli mpv ffmpeg python3-pip python3-setuptools pandoc pavucontrol zip rfkill vsftpd
+sudo apt install flex bison libelf-dev libssl-dev build-essential libncurses-dev git speedtest-cli mpv ffmpeg python3-pip python3-setuptools pandoc pavucontrol zip rfkill vsftpd vlc vlc-plugin-video-output 
 
 sudo vi /etc/vsftpd.conf ( anonymous_enable=NO, local_enable=YES, write_enable=YES )
 sudo systemctl restart vsftpd
@@ -86,22 +94,21 @@ Package: *
 Pin: release o=LP-PPA-jjriek-rockchip-multimedia
 Pin-Priority: 1001
 )
-For ubuntu-jammy and ubuntu-noble:
+For ubuntu-noble:
 add-apt-repository -y ppa:jjriek/panfork-mesa
 sudo apt update
+sudo apt-get upgrade
 Skip to next 'install mali-g610-firmware'
 
-For ubuntu-oracular:
+For ubuntu-plucky:
 sudo vi /etc/apt/sources.list.d/panfork-mesa.list ( add
-deb http://ppa.launchpad.net/jjriek/panfork-mesa/ubuntu jammy main
+deb http://ppa.launchpad.net/jjriek/panfork-mesa/ubuntu noble main
 )
 sudo apt-get update
-gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv F02122ECF25FB4D7
-gpg --export --armor F02122ECF25FB4D7 | sudo apt-key add -
-sudo apt-key list
-sudo cp /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d
+for key in AEBDF4819BE21867 9BDB3D89CE49EC21 8065BE1FC67AABDE F02122ECF25FB4D7; do gpg --keyserver keyserver.ubuntu.com --recv-keys $key && gpg --export $key | sudo tee -a /etc/apt/trusted.gpg.d/custom-keys.gpg > /dev/null; done
 
 sudo apt update
+sudo apt-get upgrade
 sudo apt-get -y install mali-g610-firmware
 sudo apt-get -y dist-upgrade
 sudo apt-get -y install libmali-g610-x11
@@ -109,40 +116,39 @@ sudo apt-get update
 sudo apt-get upgrade -y
 sudo apt-get -y dist-upgrade
 
-nproc --all
-wget https://github.com/Joshua-Riek/linux-rockchip/archive/refs/tags/Ubuntu-rockchip-6.1.0-1020.20.tar.gz
-tar -xzf Ubuntu-rockchip-6.1.0-1020.20.tar.gz
-mv linux-rockchip-Ubuntu-rockchip-6.1.0-1020.20 linux-rockchip
+git clone --depth=1 -b Ubuntu-rockchip-6.1.0-1020.20 https://github.com/Joshua-Riek/linux-rockchip.git
 cp config-6.1.0-1020-rockchip ./linux-rockchip/arch/arm64/configs/defconfig
 cd linux-rockchip
 sudo make mrproper
 make ARCH=arm64 defconfig
-make ARCH=arm64 -j8     ( run on ubuntu terminal, it may take 2 hours to compile kernel )
+make ARCH=arm64 -j$(nproc)     ( it may take 2 hours )
 sudo make ARCH=arm64 modules_install
 sudo make ARCH=arm64 dtbs_install
 sudo make ARCH=arm64 install
+
+sudo fdisk -l /dev/nvme0n1
+sudo e2label /dev/nvme0n1p2 rootfs
+sudo blkid /dev/nvme0n1p2
+ls -la /boot
 
 sudo vi /etc/grub.d/40_custom_uuid ( add
 #!/bin/sh
 exec tail -n +3 $0
 
 menuentry "Boot from UUID" {
-    search --no-floppy --fs-uuid --set=root --hint='usb0,gpt2' --hint='mmcblk1,gpt2' --hint='nvme0n1,gpt2' 9c684b63-627e-48f5-94ac-cf2920813dfb
-    echo    'Loading Linux 6.1.75-arm64 ...'
-    linux /boot/vmlinux-6.1.75 root=LABEL=rootfs rootwait rw
+    search --no-floppy --fs-uuid --set=root --hint='usb0,gpt2' --hint='mmcblk1,gpt2' --hint='nvme0n1,gpt2' 67f6188f-bbfc-4f7f-8afd-4f2259aad2b5
+    echo    'Loading Linux 6.1.75+ ...'
+    linux /boot/vmlinux-6.1.75+ root=LABEL=rootfs rootwait rw
     echo    'Loading initial ramdisk ...'
-    initrd /boot/initrd.img-6.1.75
+    initrd /boot/initrd.img-6.1.75+
     echo    'Loading rk3588-orangepi-5-plus.dtb'
-    devicetree /boot/dtbs/6.1.75/rockchip/rk3588-orangepi-5-plus.dtb
+    devicetree /boot/dtbs/6.1.75+/rockchip/rk3588-orangepi-5-plus.dtb
 }
 )
 
 Note: change the above UUID to real UUID like: b3adbe54-ab88-4da5-a9a6-08cf87a09d69
-Find real UUID: sudo blkid /dev/nvme0n1p2
-Note: kernel name maybe vmlinuz-6.1.75
+Note: kernel name maybe vmlinuz-6.1.75+
 
-sudo e2label /dev/nvme0n1p2 rootfs
-sudo blkid /dev/nvme0n1p2
 sudo chmod +x /etc/grub.d/40_custom_uuid
 sudo vi /etc/default/grub ( change GRUB_DEFAULT=0 to GRUB_DEFAULT="Boot from UUID" )
 sudo update-grub  ( generate grub.cfg )
@@ -151,21 +157,32 @@ sync
 sudo reboot
 
 uname -a
+lsb_release -a
+
 Check if Ubuntu is running UEFI mode:
 ls /sys/firmware/efi
 
-sudo apt install glmark2-es2 glmark2-es2-wayland
-
 speedtest-cli
-glmark2-es2
 glmark2-es2-wayland
 
 aplay -l
-pavucontrol  ( select hdmi0 as default )
+pavucontrol  ( select card 2 rockchip-hdmi0 as default )
+
+sudo add-apt-repository ppa:mozillateam/ppa
+sudo apt update
+sudo apt install firefox-esr
+firefox -> youtube.com -> search YmDNhi07_Ho
 
 git clone https://github.com/yt-dlp/yt-dlp.git
 cd yt-dlp
 make
 cd ../
-~/yt-dlp/yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]' hyUhEjtlDLA -o avemaria.mp4
-mpv avemaria.mp4
+~/yt-dlp/yt-dlp -f 'bestvideo[ext=mp4][protocol=https]+bestaudio[ext=m4a][protocol=https]' 3qrKjywjo7Q -o swan.mp4
+mpv swan.mp4
+cvlc --gl=wgl --glconv=any swan.mp4
+
+Plugin ASUS USB-BT500 bluetooth usb dongle to rpi5.
+sudo rfkill list
+hciconfig hci0
+hcitool dev
+hciconfig -a

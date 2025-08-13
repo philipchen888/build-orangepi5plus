@@ -34,20 +34,30 @@ echo $XDG_SESSION_TYPE
 Check audio driver: ( pulseaudio or pipewire )
 pactl info
 
-sudo apt install speedtest-cli python3-pip python3-setuptools ffmpeg mpv glmark2-es2-wayland pandoc chromium-browser
+sudo apt install speedtest-cli python3-pip python3-setuptools ffmpeg mpv glmark2-es2-wayland pandoc vlc vlc-plugin-video-output
 
 speedtest-cli --secure
 
 glmark2-es2-wayland
 
 aplay -l
-pavucontrol  ( select hdmi0 as default )
+pavucontrol  ( select card 2 rockchip-hdmi0 as default )
 
-chromium -> youtube.com -> search YmDNhi07_Ho
+sudo add-apt-repository ppa:mozillateam/ppa
+sudo apt update
+sudo apt install firefox-esr
+firefox -> youtube -> search YmDNhi07_Ho
 
 git clone https://github.com/yt-dlp/yt-dlp.git
 cd yt-dlp
 make
 cd ../
-~/yt-dlp/yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]' hyUhEjtlDLA -o avemaria.mp4
-mpv avemaria.mp4
+~/yt-dlp/yt-dlp -f 'bestvideo[ext=mp4][protocol=https]+bestaudio[ext=m4a][protocol=https]' 3qrKjywjo7Q -o swan.mp4
+mpv swan.mp4
+cvlc --gl=wgl --glconv=any swan.mp4
+
+Plugin ASUS USB-BT500 bluetooth usb dongle to rpi5.
+sudo rfkill list
+hciconfig hci0
+hcitool dev
+hciconfig -a
