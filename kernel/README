@@ -1,8 +1,9 @@
 Compile mainline kernel:
 
-git clone --depth=1 -b Ubuntu-rockchip-6.1.0-1020.20 https://github.com/Joshua-Riek/linux-rockchip.git
-\rm -rf out; mkdir out;
+git clone --depth=1 -b Ubuntu-rockchip-6.1.0-1027.27 https://github.com/Joshua-Riek/linux-rockchip.git
+mv linux-rockchip linux
+
 make kernel
 
-The results are in ./linux-rockchip/tmp/lib/modules/*
-                   ./linux-rockchip/tmp/boot/*
+The results are in ./linux/tmp/lib/modules/*
+                   ./linux/tmp/boot/*

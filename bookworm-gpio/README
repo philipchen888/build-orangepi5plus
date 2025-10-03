@@ -46,11 +46,13 @@ sync
 sudo umount /mnt
 Eject sdcard from PC.
 
-Plugin sdcard and ethernet cable to orangepi 5 plus.
+Plugin sdcard and wifi usb dongle to orangepi 5 plus.
 Esc -> Boot Manager -> ( sdcard, emmc userdata or the last UEFI )
 Login:
 Username: linaro
 Password: linaro
+Setup wifi. Disable power saving, auto suspend and screen saver.
+sudo ifconfig
 uname -a
 lsb_release -a
 sudo dpkg-reconfigure tzdata
@@ -59,10 +61,21 @@ date
 sudo apt update
 sudo apt upgrade
 sync
-Disable power saving and screen saver.
+free
+glxinfo | grep OpenGL
 date
+Check if Debian is running UEFI mode:
+ls /sys/firmware/efi
+Check display mode: ( wayland or x11 )
+echo $XDG_SESSION_TYPE
+Check audio driver: ( pulseaudio or pipewire )
+pactl info
 
-sudo apt install python3-pip python3-setuptools python3-dev python3-smbus python3-smbus2 python3-spidev python3-serial python3-periphery
+sudo apt install speedtest-cli python3-pip python3-setuptools python3-dev python3-smbus python3-smbus2 python3-spidev python3-serial python3-periphery glmark2-es2-wayland
+
+speedtest-cli --secure
+glmark2-es2-wayland
+aplay -l
 
 gcc gpio_test.c -o gpio_test
 sudo ./gpio_test

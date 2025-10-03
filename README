@@ -42,78 +42,69 @@ Steps to build orangepi5plus sdcard image:
    Boot NVMe without sdcard.
 
 4. cd ~/build-orangepi5plus/kernel ( Compile vendor kernel )
-   git clone --depth=1 -b Ubuntu-rockchip-6.1.0-1020.20 https://github.com/Joshua-Riek/linux-rockchip.git
-   \rm -rf out; mkdir out;
+   git clone --depth=1 -b Ubuntu-rockchip-6.1.0-1027.27 https://github.com/Joshua-Riek/linux-rockchip.git
+   mv linux-rockchip linux
+
    make kernel
 
-   The results are in ./linux-rockchip/tmp/lib/modules/*
-                      ./linux-rockchip/tmp/boot/*
+   The results are in ./linux/tmp/lib/modules/*
+                      ./linux/tmp/boot/*
 
-5. cd ~/build-orangepi5plus/linux  ( Compile mainline kernel )
-   wget https://github.com/Joshua-Riek/linux-rockchip/archive/refs/tags/Ubuntu-rockchip-6.1.0-1020.20.tar.gz
-   tar -xzf Ubuntu-rockchip-6.1.0-1020.20.tar.gz
-   mv linux-rockchip-Ubuntu-rockchip-6.1.0-1020.20 linux-rockchip
-   \rm -rf out; mkdir out;
-   make kernel
-
-   The results are in ./linux-rockchip/tmp/lib/modules/*
-                      ./linux-rockchip/tmp/boot/*
-
-6. cd ~/build-orangepi5plus/rootfs-bookworm  ( Compile debian bookworm rootfs )
+5. cd ~/build-orangepi5plus/rootfs-bookworm  ( Compile debian bookworm rootfs )
    make rootfs
    The results are in ./linaro-rootfs.img linaro-esp.img
    make clean
 
-7. cd ~/build-orangepi5plus/rootfs-trixie  ( Compile debian trixie rootfs )
+6. cd ~/build-orangepi5plus/rootfs-trixie  ( Compile debian trixie rootfs )
    make rootfs
    The results are in ./linaro-rootfs.img linaro-esp.img
    make clean
 
-8. cd ~/build-orangepi5plus/rootfs-ubuntu-noble  ( Compile ubuntu-noble rootfs )
+7. cd ~/build-orangepi5plus/rootfs-ubuntu-noble  ( Compile ubuntu-noble rootfs )
    make rootfs
    The results are in ./linaro-rootfs.img linaro-esp.img
    make clean
 
-9. cd ~/build-orangepi5plus/rootfs-ubuntu-plucky  ( Compile ubuntu-plucky rootfs )
+8. cd ~/build-orangepi5plus/rootfs-ubuntu-plucky  ( Compile ubuntu-plucky rootfs )
    make rootfs
    The results are in ./linaro-rootfs.img linaro-esp.img
    make clean
 
-10. cd ~/build-orangepi5plus/bookworm-gnome  ( Build debian bookworm gnome-desktop image )
+9. cd ~/build-orangepi5plus/bookworm-gnome  ( Build debian bookworm gnome-desktop image )
+   Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
+   sudo ./mksdcardimg.sh
+   Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
+
+10. cd ~/build-orangepi5plus/trixie-gnome    ( Build debian trixie gnome-desktop image )
     Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
     sudo ./mksdcardimg.sh
     Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-11. cd ~/build-orangepi5plus/trixie-gnome    ( Build debian trixie gnome-desktop image )
+11. cd ~/build-orangepi5plus/ubuntu-noble  ( Build ubuntu-noble image )
     Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
     sudo ./mksdcardimg.sh
     Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-12. cd ~/build-orangepi5plus/ubuntu-noble  ( Build ubuntu-noble image )
+12. cd ~/build-orangepi5plus/ubuntu-plucky  ( Build ubuntu-plucky image )
     Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
     sudo ./mksdcardimg.sh
     Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-13. cd ~/build-orangepi5plus/ubuntu-plucky  ( Build ubuntu-plucky image )
-    Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
-    sudo ./mksdcardimg.sh
-    Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
+13. cd ~/build-orangepi5plus/android       ( Build android image )
 
-14. cd ~/build-orangepi5plus/android       ( Build android image )
+14. cd ~/build-orangepi5plus/bookworm-flightaware  ( flightaware in bookworm-lxde )
 
-15. cd ~/build-orangepi5plus/bookworm-flightaware  ( flightaware in bookworm-lxde )
+15. cd ~/build-orangepi5plus/yocto-xfce    ( Build yocto xfce-desktop image )
 
-16. cd ~/build-orangepi5plus/yocto-xfce    ( Build yocto xfce-desktop image )
+16. cd ~/build-orangepi5plus/buildroot     ( Build buildroot image )
 
-17. cd ~/build-orangepi5plus/buildroot     ( Build buildroot image )
+17. cd ~/build-orangepi5plus/bookworm-uefi ( Build bookworm uefi image )
 
-18. cd ~/build-orangepi5plus/bookworm-uefi ( Build bookworm uefi image )
+18. cd ~/build-orangepi5plus/trixie-uefi   ( Build trixie uefi image )
 
-19. cd ~/build-orangepi5plus/trixie-uefi   ( Build trixie uefi image )
-
-20. cd ~/build-orangepi5plus/ubuntu-uefi   ( Build ubuntu plucky uefi images )
+19. cd ~/build-orangepi5plus/ubuntu-uefi   ( Build ubuntu plucky uefi images )
     Install Ubuntu to NVMe SSD using plucky-desktop-arm64.iso in USB2 SATA SSD.
 
-21. cd ~/build-orangepi5plus/bookworm-gpio ( Build bookworm gpio tests )
+20. cd ~/build-orangepi5plus/bookworm-gpio ( Build bookworm gpio tests )
 
-22. cd ~/build-orangepi5plus/fedora        ( Build fedora 40 image )
+21. cd ~/build-orangepi5plus/fedora        ( Build fedora 40 image )

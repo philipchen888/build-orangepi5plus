@@ -35,8 +35,8 @@ trap finish ERR
 echo -e "\033[36m Extract image \033[0m"
 sudo tar -xpf live-image-arm64.tar.tar.gz
 
-sudo cp -rf ../kernel/linux-rockchip/tmp/lib/modules $TARGET_ROOTFS_DIR/lib
-sudo cp -rf ../kernel/linux-rockchip/tmp/boot/* $TARGET_ROOTFS_DIR/boot
+sudo cp -rf ../kernel/linux/tmp/lib/modules $TARGET_ROOTFS_DIR/lib
+sudo cp -rf ../kernel/linux/tmp/boot/* $TARGET_ROOTFS_DIR/boot
 export KERNEL_VERSION=$(ls $TARGET_ROOTFS_DIR/boot/vmlinuz-* 2>/dev/null | sed 's|.*/vmlinuz-||' | sort -V | tail -n 1)
 echo $KERNEL_VERSION
 sudo sed -e "s/6.16.0/$KERNEL_VERSION/g" < ../kernel/patches/40_custom_uuid | sudo tee $TARGET_ROOTFS_DIR/boot/40_custom_uuid > /dev/null
@@ -60,9 +60,13 @@ sudo mount -o bind /dev/pts $TARGET_ROOTFS_DIR/dev/pts
 
 cat << EOF | sudo chroot $TARGET_ROOTFS_DIR
 
-rm -rf /etc/resolv.conf
-echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4" > /etc/resolv.conf
+rm -f /etc/resolvconf/resolv.conf.d/head
+echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4" | tee /etc/resolvconf/resolv.conf.d/head >/dev/null
+rm -f /etc/resolv.conf
+ln -s /run/resolvconf/resolv.conf /etc/resolv.conf
 resolvconf -u
+cat /etc/resolv.conf
+
 echo -e "deb http://ppa.launchpad.net/jjriek/panfork-mesa/ubuntu jammy main\ndeb http://ppa.launchpad.net/mozillateam/ppa/ubuntu jammy main" > /etc/apt/sources.list.d/panfork-mesa.list
 apt-get update
 \rm -rf /etc/initramfs/post-update.d/z50-raspi-firmware
@@ -70,7 +74,7 @@ apt-get install -y mali-g610-firmware libmali-g610-x11
 apt-get update
 apt-get upgrade -y
 apt-get dist-upgrade -y
-apt-get install -y build-essential git wget v4l-utils grub-efi-arm64 zstd
+apt-get install -y build-essential git wget v4l-utils grub-efi-arm64 zstd gdm3
 
 # Install and configure GRUB
 mkdir -p /boot/efi

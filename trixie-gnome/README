@@ -7,12 +7,12 @@ Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
 sudo ./mksdcardimg.sh
 Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD and ethernet cable to orangepi 5 plus.
+Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD and wifi usb dongle to orangepi 5 plus.
 Esc -> Boot Manager -> ( sdcard, emmc userdata or the last UEFI )
 Login:
 Username: linaro
 Password: linaro
-Disable power saving, auto suspend and screen saver.
+Setup wifi. Disable power saving, auto suspend and screen saver.
 sudo systemctl start ssh.service
 sudo systemctl enable ssh.service
 uname -a
@@ -22,8 +22,8 @@ sudo dpkg-reconfigure locales
 date
 sudo apt update
 sudo apt upgrade
-sudo apt dist-upgrade
 sync
+free
 glxinfo | grep OpenGL
 date
 Check if Debian is running UEFI mode:
@@ -48,12 +48,12 @@ git clone https://github.com/yt-dlp/yt-dlp.git
 cd yt-dlp
 make
 cd ../
-~/yt-dlp/yt-dlp -f 'bestvideo[ext=mp4][protocol=https]+bestaudio[ext=m4a][protocol=https]' 3qrKjywjo7Q -o swan.mp4
-mpv --hwdec=auto-copy --log-file=mpv.log swan.mp4
-grep Using mpv.log
+~/yt-dlp/yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]' 3qrKjywjo7Q -o swan-temp.mp4 --merge-output-format mp4 && ffmpeg -hide_banner -loglevel error -i swan-temp.mp4 -c:v libx265 -pix_fmt yuv420p -crf 28 -preset faster -c:a copy swan.mp4  ( It may take 25 minutes )
+mpv --hwdec=auto-copy swan.mp4
+ffplay swan.mp4
 cvlc --gl=wgl --glconv=any swan.mp4
 
-Plugin ASUS USB-BT500 bluetooth usb dongle to rpi5.
+Plugin ASUS USB-BT500 bluetooth usb dongle to opi5+.
 sudo rfkill list
 hciconfig hci0
 hcitool dev
