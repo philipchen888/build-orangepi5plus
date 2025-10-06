@@ -1,9 +1,0 @@
-[Unit]
-Description=Resize root filesystem to fit available disk space
-
-[Service]
-Type=oneshot
-ExecStart=-/usr/sbin/resize-helper -y
-
-[Install]
-WantedBy=multi-user.target

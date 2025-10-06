@@ -7,8 +7,8 @@ cd edk2-rk3588
 
 The result is in ./RK3588_NOR_FLASH.img
 
-Download Orangepi5plus_1.0.8_debian_bookworm_desktop_xfce_linux6.1.43.7z from http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-Pi-5-plus-32GB.html
-7z x Orangepi5plus_1.0.8_debian_bookworm_desktop_xfce_linux6.1.43.7z
+Download Orangepi5plus_1.2.0_debian_bookworm_desktop_xfce_linux6.1.43.7z from http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-Pi-5-plus-32GB.html
+7z x Orangepi5plus_1.2.0_debian_bookworm_desktop_xfce_linux6.1.43.7z
 Burn debian bookworm desktop image to sdcard.
 sudo mount /dev/sda2 /mnt
 cp ./RK3588_NOR_FLASH.img /mnt/home/orangepi
