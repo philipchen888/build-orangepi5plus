@@ -1,0 +1,4 @@
+label OrangePi 5 Plus Linux
+  kernel ../Image
+  devicetree ../rk3588-orangepi-5-plus.dtb
+  append root=/dev/mmcblk1p3 rw rootwait console=tty1

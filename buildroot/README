@@ -1,41 +1,39 @@
 Build buildroot sdcard image for orangepi 5 plus.
 
-   input files: ../linux/linux-rockchip/tmp/lib/modules/*
-                ../linux/linux-rockchip/tmp/boot/*
+See ../uboot/README to erase SPI flash.
 
-   wget https://developer.arm.com/-/media/Files/downloads/gnu/12.3.rel1/binrel/arm-gnu-toolchain-12.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz
-   sudo tar -xJf arm-gnu-toolchain-12.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz -C /usr/local/
-   git clone https://github.com/smsxgli/buildroot.git
-   cp ./patches/orangepi_5_defconfig ./buildroot/configs
-   \rm -rf ./buildroot/board/orangepi/orangepi-5
-   cp -r ./patches/orangepi-5 ./buildroot/board/orangepi
-   cd buildroot
-   \rm .config
-   make clean
-   make orangepi_5_defconfig
-   make menuconfig        ( optional to add packages )
-   make
+wget https://buildroot.org/downloads/buildroot-2025.08.tar.gz
+tar -xzf buildroot-2025.08.tar.gz
+mv buildroot-2025.08 buildroot
+vi ./buildroot/configs/orangepi_5_plus_defconfig ( delete KERNEL, delete BR2_DOWNLOAD_FORCE_CHECK_HASHES=y, change to BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_6_1=y, append ./patches/orangepi_5_defconfig )
+cp ./patches/orangepi-5/* ./buildroot/board/orangepi/orangepi-5-plus/
+cd buildroot
+\rm -rf .config output
+make clean
+make orangepi_5_plus_defconfig
+make linux
+make
 
-   The result is in ./output/images/sdcard.img
+The result is in ./output/images/sdcard.img
 
-   Plugin sdcard to PC.
-   sudo dd if=./output/images/sdcard.img of=/dev/sda bs=4096 conv=notrunc,fsync
+Plugin sdcard to PC.
+sudo dd if=./output/images/sdcard.img of=/dev/sda bs=4096 conv=notrunc,fsync
 
-   sudo mount /dev/sda1 /mnt
-   sudo \rm -rf /mnt/boot/*
-   sudo \rm -rf /mnt/lib/modules/*
-   sudo cp -r ../../linux/linux-rockchip/tmp/boot/* /mnt/boot
-   sudo cp ../patches/initrd.img-6.1.75 /mnt/boot
-   sudo cp ../patches/extlinux.conf /mnt/boot/extlinux
-   sudo cp -r ../../linux/linux-rockchip/tmp/lib/modules/* /mnt/lib/modules
-   sync
-   sudo umount /mnt
-   Eject sdcard from PC.
+sudo mount /dev/sda2 /mnt
+sudo vi /mnt/etc/network/interfaces ( delete everything after iface lo inet loopback )
+sudo vi /mnt/etc/vsftpd.conf ( anonymous_enable=NO, local_enable=YES, write_enable=YES )
+sync
+sudo umount /mnt
+Eject sdcard from PC.
 
-plugin sdcard to SBC
+Plugin sdcard and ethernet cable to orangepi_5_plus.
 login:
 username: root
 password: linaro
+
+ssh root@192.168.86.211
+
+uname -a
 
 adduser linaro
 
@@ -44,17 +42,14 @@ aplay -l
 vi /etc/asound.conf ( add
 pcm.!default {
 type hw
-card 3
+card 2
 }
 ctl.!default {
 type hw
-card 3
+card 2
 }
 
-vi /etc/vsftpd.conf ( anonymous_enable=NO, local_enable=YES, write_enable=YES )
-sync
-reboot
+alsactl -F restore
 
 aplay /home/linaro/yoursong.wav
-mpg123 -a hw:3,0 /home/linaro/yoursong.mp3
-mpv --no-video /home/linaro/yoursong.mp3
+mpg123 -a hw:2,0 /home/linaro/yoursong.mp3

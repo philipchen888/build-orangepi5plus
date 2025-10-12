@@ -1,6 +1,7 @@
 Build yocto desktop sdcard image for orangepi 5 plus.
 
-Note: Need 300GB free space in hard disk since yocto downloads many source files.
+   See ../uboot/README to erase SPI flash.
+   Note: Need 300GB free space in hard disk since yocto downloads many source files.
 
    mkdir ${HOME}/download
    mkdir ${HOME}/sstate-cache

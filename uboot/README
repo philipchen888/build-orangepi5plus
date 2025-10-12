@@ -37,3 +37,9 @@ tar -xzf master.tar.gz
 mv rkbin-master rkbin
 make u-boot
 The result is in ./out/u-boot-spi.bin
+
+wget https://github.com/schneid-l/u-boot-orangepi5/releases/download/v1.4/u-boot-orangepi5-plus-spi.bin
+flash u-boot-orangepi5-plus-spi.bin to spi flash:
+sudo dd if=.u-boot-orangepi5-plus-spi.bin of=/dev/mtdblock0 bs=1M seek=0
+sync
+
