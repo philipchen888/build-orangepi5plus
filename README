@@ -98,13 +98,4 @@ Steps to build orangepi5plus sdcard image:
 
 16. cd ~/build-orangepi5plus/buildroot     ( Build buildroot image )
 
-17. cd ~/build-orangepi5plus/bookworm-uefi ( Build bookworm uefi image )
-
-18. cd ~/build-orangepi5plus/trixie-uefi   ( Build trixie uefi image )
-
-19. cd ~/build-orangepi5plus/ubuntu-uefi   ( Build ubuntu plucky uefi images )
-    Install Ubuntu to NVMe SSD using plucky-desktop-arm64.iso in USB2 SATA SSD.
-
-20. cd ~/build-orangepi5plus/bookworm-gpio ( Build bookworm gpio tests )
-
-21. cd ~/build-orangepi5plus/fedora        ( Build fedora 40 image )
+17. cd ~/build-orangepi5plus/bookworm-gpio ( Build bookworm gpio tests )
