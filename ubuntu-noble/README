@@ -47,11 +47,15 @@ sudo apt update
 sudo apt install firefox-esr
 firefox -> youtube -> search YmDNhi07_Ho
 
+Do follows on PC, then ftp swan.mp4 to opi5+.
+(
 git clone https://github.com/yt-dlp/yt-dlp.git
 cd yt-dlp
 make
 cd ../
-~/yt-dlp/yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]' 3qrKjywjo7Q -o swan-temp.mp4 --merge-output-format mp4 && ffmpeg -hide_banner -loglevel error -i swan-temp.mp4 -c:v libx265 -pix_fmt yuv420p -crf 28 -preset faster -c:a copy swan.mp4  ( It may take 25 minutes )
+~/yt-dlp/yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]' 3qrKjywjo7Q -o swan.mp4 --postprocessor-args " -c:v libx265 -b:v 2M -c:a copy"
+)
+
 mpv --hwdec=auto-copy swan.mp4
 ffplay swan.mp4
 cvlc --gl=wgl --glconv=any swan.mp4

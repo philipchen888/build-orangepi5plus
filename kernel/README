@@ -1,8 +1,7 @@
-Compile mainline kernel:
+Compile vendor kernel:
 
 git clone --depth=1 -b Ubuntu-rockchip-6.1.0-1027.27 https://github.com/Joshua-Riek/linux-rockchip.git
 mv linux-rockchip linux
-
 make kernel
 
 The results are in ./linux/tmp/lib/modules/*
