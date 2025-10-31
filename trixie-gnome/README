@@ -13,6 +13,8 @@ Login:
 Username: linaro
 Password: linaro
 Setup wifi. Disable power saving, auto suspend and screen saver.
+sudo systemctl start ssh.service
+sudo systemctl enable ssh.service
 uname -a
 lsb_release -a
 sudo dpkg-reconfigure tzdata

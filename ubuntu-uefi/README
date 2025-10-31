@@ -1,0 +1,78 @@
+Build ubuntu-uefi sdcard image for orangepi5 plus:
+
+Install ubuntu from usb3 stick ubuntu iso to empty sdcard.
+
+cd ~/Downloads
+wget https://cdimage.ubuntu.com/releases/25.10/release/ubuntu-25.10-desktop-arm64.iso
+
+cd ~/build-orangepi5plus/ubuntu-uefi
+
+Plugin usb3 stick to PC.
+sudo ./mkusb3stick.sh
+sudo mkfs.vfat /dev/sda1
+sudo fdisk -l /dev/sda
+sudo mount /dev/sda1 /mnt
+sudo 7z x ~/Downloads/ubuntu-25.10-desktop-arm64.iso -o/mnt && sync && sudo umount /mnt
+Eject usb3 stick from PC.
+
+Plugin sdcard to PC.
+sudo ./mksdcard.sh
+Eject sdcard from PC.
+
+Plugin sdcard, usb3 stick  and ethernet cable to opi5+. Power on opi5+.
+
+Select install
+Double click Install Ubuntu LTS icon.
+Erase disk and install Ubuntu.
+Click Install now.
+Contine till finished. Restart.
+
+Remove usb3 stick from opi5+.
+Login:
+Username: linaro
+Password: linaro
+Disable power saving, auto suspend and screen saver.
+sudo apt install net-tools openssh-server pulseaudio-utils
+sudo ifconfig
+uname -a
+lsb_release -a
+sudo dpkg-reconfigure tzdata
+sudo dpkg-reconfigure locales
+date
+sudo apt update
+sudo apt upgrade
+sudo apt dist-upgrade
+sync
+free
+
+glxinfo | grep OpenGL
+date
+Check if Ubuntu is running UEFI mode:
+ls /sys/firmware/efi
+Check display mode: ( wayland or x11 )
+echo $XDG_SESSION_TYPE
+Check audio driver: ( pulseaudio or pipewire )
+pactl info
+
+sudo apt install speedtest-cli python3-pip python3-setuptools ffmpeg mpv glmark2-es2-wayland pandoc vlc vlc-plugin-video-output pavucontrol git vsftpd
+
+speedtest-cli --secure
+
+glmark2-es2-wayland
+aplay -l
+pavucontrol ( set hdmi as default )
+
+firefox -> youtube.com -> search YmDNhi07_Ho
+
+Do follows on PC, then ftp swan.mp4 to opi5+.
+(
+git clone https://github.com/yt-dlp/yt-dlp.git
+cd yt-dlp
+make
+cd ../
+~/yt-dlp/yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]' 3qrKjywjo7Q -o swan.mp4 --postprocessor-args " -c:v libx265 -b:v 2M -c:a copy"
+)
+
+mpv --hwdec=auto-copy swan.mp4
+ffplay swan.mp4
+cvlc --gl=wgl --glconv=any swan.mp4
