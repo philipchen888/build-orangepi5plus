@@ -34,16 +34,15 @@ wget http://www.orangepi.org/orangepiwiki/images/a/ac/Plus5-img302.png
 wget http://www.orangepi.org/orangepiwiki/images/5/53/Plus5-img184.png
 wget http://www.orangepi.org/orangepiwiki/images/6/6c/Plus5-img308.png
 
-Input files: ../rootfs-bookworm/linaro-rootfs.img
-                               /linaro-esp.img
+Input files: ../rootfs-bookwormgpio/linaro-rootfs.img
+                                   /linaro-esp.img
 
 Plugin sdcard to PC.
 sudo ./mksdcardimg.sh
 sudo mount /dev/sda2 /mnt
 cp ./gpiotest/* /mnt/home/linaro
 cp ./pn532nfc/* /mnt/home/linaro
-sync
-sudo umount /mnt
+sync; sudo umount /mnt;
 Eject sdcard from PC.
 
 Plugin sdcard and wifi usb dongle to orangepi 5 plus.

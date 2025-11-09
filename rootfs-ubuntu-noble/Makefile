@@ -34,11 +34,11 @@ prebuild:
 	--keyring-packages ubuntu-keyring \
 	--linux-flavours rockchip \
 	--linux-packages none \
-	--parent-mirror-binary 'http://ports.ubuntu.com/ubuntu-ports/' \
-	--parent-mirror-binary-security 'http://ports.ubuntu.com/ubuntu-ports/' \
-	--parent-mirror-bootstrap 'http://ports.ubuntu.com/ubuntu-ports/' \
-	--parent-mirror-chroot 'http://ports.ubuntu.com/ubuntu-ports/' \
-	--parent-mirror-chroot-security 'http://ports.ubuntu.com/ubuntu-ports/' \
+	--parent-mirror-binary 'http://mirrors.mit.edu/ubuntu-ports/' \
+	--parent-mirror-binary-security 'http://mirrors.mit.edu/ubuntu-ports/' \
+	--parent-mirror-bootstrap 'http://mirrors.mit.edu/ubuntu-ports/' \
+	--parent-mirror-chroot 'http://mirrors.mit.edu/ubuntu-ports/' \
+	--parent-mirror-chroot-security 'http://mirrors.mit.edu/ubuntu-ports/' \
 	--mode ubuntu \
 	--security true \
 	--system normal
@@ -46,12 +46,6 @@ prebuild:
 buildrootfs:
 	\cp -rf $(PWD)/../customization/* config/
 	cp linaro.list.chroot config/package-lists/linaro.list.chroot
-	cp 020-ubuntu-rockchip-tweaks.chroot config/hooks
-	cp extra-ppas.list.chroot config/archives/extra-ppas.list.chroot
-	cp extra-ppas.list.chroot config/archives/extra-ppas.list.binary
-	cp extra-ppas.key.chroot  config/archives/extra-ppas.key.chroot
-	cp extra-ppas.key.chroot  config/archives/extra-ppas.key.binary
-	cp extra-ppas.pref.chroot config/archives/extra-ppas.pref.chroot
 	sudo lb build
 
 postbuild:

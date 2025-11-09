@@ -35,11 +35,11 @@ trap finish ERR
 echo -e "\033[36m Extract image \033[0m"
 sudo tar -xpf binary-tar.tar.gz
 
-sudo cp -rf ../kernel/linux/tmp/lib/modules $TARGET_ROOTFS_DIR/lib
-sudo cp -rf ../kernel/linux/tmp/boot/* $TARGET_ROOTFS_DIR/boot
+sudo cp -rf ../linux/linux/tmp/lib/modules $TARGET_ROOTFS_DIR/lib
+sudo cp -rf ../linux/linux/tmp/boot/* $TARGET_ROOTFS_DIR/boot
 export KERNEL_VERSION=$(ls $TARGET_ROOTFS_DIR/boot/vmlinuz-* 2>/dev/null | sed 's|.*/vmlinuz-||' | sort -V | tail -n 1)
 echo $KERNEL_VERSION
-sudo sed -e "s/6.16.0/$KERNEL_VERSION/g" < ../kernel/patches/40_custom_uuid | sudo tee $TARGET_ROOTFS_DIR/boot/40_custom_uuid > /dev/null
+sudo sed -e "s/6.16.0/$KERNEL_VERSION/g" < ../linux/patches/40_custom_uuid | sudo tee $TARGET_ROOTFS_DIR/boot/40_custom_uuid > /dev/null
 cat $TARGET_ROOTFS_DIR/boot/40_custom_uuid
 
 # overlay folder
@@ -65,14 +65,20 @@ cat /etc/resolv.conf
 
 # add-apt-repository -y ppa:jjriek/panfork-mesa
 # apt-get update
-\rm -rf /etc/initramfs/post-update.d/z50-raspi-firmware
 # apt-get -y install mali-g610-firmware
 # apt-get -y dist-upgrade
 # apt-get -y install libmali-g610-x11
 apt-get update
+\rm -rf /etc/initramfs/post-update.d/z50-raspi-firmware
 apt-get upgrade -y
 apt-get -y dist-upgrade
 apt-get install -y build-essential git wget grub-efi-arm64 zstd initramfs-tools
+
+mkdir -p /lib/firmware/arm/mali/arch10.8/
+\rm -f /lib/firmware/arm/mali/arch10.8/*
+wget https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/plain/arm/mali/arch10.8/mali_csffw.bin -P /lib/firmware/arm/mali/arch10.8/
+chmod 644 /lib/firmware/arm/mali/arch10.8/mali_csffw.bin
+echo "panthor" | tee /etc/modules-load.d/panthor.conf
 
 # Install and configure GRUB
 mkdir -p /boot/efi
@@ -82,13 +88,6 @@ update-grub
 cp /boot/40_custom_uuid /etc/grub.d/
 chmod +x /etc/grub.d/40_custom_uuid
 rm -rf /boot/40_custom_uuid
-
-# Fix mouse lagging issue
-cat << MOUSE_EOF >> /etc/environment
-MUTTER_DEBUG_ENABLE_ATOMIC_KMS=0
-MUTTER_DEBUG_FORCE_KMS_MODE=simple
-CLUTTER_PAINT=disable-dynamic-max-render-time
-MOUSE_EOF
 
 # Migrate extlinux.conf to GRUB
 rm -rf /boot/extlinux
@@ -108,6 +107,15 @@ update-grub
 
 chmod o+x /usr/lib/dbus-1.0/dbus-daemon-launch-helper
 chmod +x /etc/rc.local
+
+# Create the linaro user account
+/usr/sbin/useradd -d /home/linaro -G adm,sudo,video -m -N -u 29999 linaro
+echo -e "linaro:linaro" | chpasswd
+echo -e "linaro-alip" | tee /etc/hostname
+touch "/var/lib/oem-config/run"
+
+# Enable wayland session
+sed -i 's/#WaylandEnable=false/WaylandEnable=true/g' /etc/gdm3/custom.conf
 
 systemctl enable rc-local
 systemctl enable resize-helper

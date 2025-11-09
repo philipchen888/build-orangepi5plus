@@ -46,11 +46,6 @@ prebuild:
 buildrootfs:
 	\cp -rf $(PWD)/../customization/* config/
 	cp linaro.list.chroot config/package-lists/linaro.list.chroot
-	cp extra-ppas.list.chroot config/archives/extra-ppas.list.chroot
-	cp extra-ppas.list.chroot config/archives/extra-ppas.list.binary
-	cp extra-ppas.key.chroot  config/archives/extra-ppas.key.chroot
-	cp extra-ppas.key.chroot  config/archives/extra-ppas.key.binary
-	cp extra-ppas.pref.chroot config/archives/extra-ppas.pref.chroot
 	cp config/hooks/normal/* config/hooks/
 	sudo lb build
 

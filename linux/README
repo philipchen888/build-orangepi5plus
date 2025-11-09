@@ -1,0 +1,31 @@
+compile mainline kernel for orangepi5 plus:
+
+git clone --depth=1 --branch v6.18-rc4 https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+vi ./linux/arch/arm64/boot/dts/rockchip/rk3588-base.dtsi ( change compatible = "rockchip,rk3588-mali", "arm,mali-valhall-csf"; to compatible = "arm,mali-valhall-csf", "arm,mali-g610"; )
+vi ./linux/arch/arm64/configs/defconfig ( enable NVMe change to:
+CONFIG_PHY_ROCKCHIP_PCIE=y
+CONFIG_BLK_DEV_NVME=y
+CONFIG_PCIE_ROCKCHIP_HOST=y
+CONFIG_SATA_AHCI=y
+CONFIG_EXT4_FS=y
+CONFIG_PCIEPORTBUS=y
+CONFIG_VIDEO_ROCKCHIP_VDEC=y
+CONFIG_VIDEO_ROCKCHIP_RGA=y
+CONFIG_MEDIA_SUPPORT=y
+CONFIG_MEDIA_CONTROLLER=y
+CONFIG_VIDEO_DEV=y
+CONFIG_V4L2_MEM2MEM_DEV=y
+CONFIG_V4L2_H264=y
+CONFIG_VIDEO_HANTRO=m
+CONFIG_VIDEO_HANTRO_ROCKCHIP=y
+CONFIG_SPI_SPIDEV=y
+CONFIG_DRM_ROCKCHIP=y
+CONFIG_ROCKCHIP_SARADC=y
+CONFIG_PHY_ROCKCHIP_INNO_HDMI=y
+CONFIG_DRM_LIMA=m
+CONFIG_DRM_PANTHOR=m
+CONFIG_DRM_PANFROST=m
+)
+
+make kernel
+

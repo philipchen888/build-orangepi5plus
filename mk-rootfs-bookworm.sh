@@ -35,13 +35,12 @@ trap finish ERR
 echo -e "\033[36m Extract image \033[0m"
 sudo tar -xpf live-image-arm64.tar.tar.gz
 
-sudo cp -rf ../kernel/linux/tmp/lib/modules $TARGET_ROOTFS_DIR/lib
-sudo cp -rf ../kernel/linux/tmp/boot/* $TARGET_ROOTFS_DIR/boot
+sudo cp -rf ../linux/linux/tmp/lib/modules $TARGET_ROOTFS_DIR/lib
+sudo cp -rf ../linux/linux/tmp/boot/* $TARGET_ROOTFS_DIR/boot
 export KERNEL_VERSION=$(ls $TARGET_ROOTFS_DIR/boot/vmlinuz-* 2>/dev/null | sed 's|.*/vmlinuz-||' | sort -V | tail -n 1)
 echo $KERNEL_VERSION
-sudo sed -e "s/6.16.0/$KERNEL_VERSION/g" < ../kernel/patches/40_custom_uuid | sudo tee $TARGET_ROOTFS_DIR/boot/40_custom_uuid > /dev/null
+sudo sed -e "s/6.16.0/$KERNEL_VERSION/g" < ../linux/patches/40_custom_uuid | sudo tee $TARGET_ROOTFS_DIR/boot/40_custom_uuid > /dev/null
 cat $TARGET_ROOTFS_DIR/boot/40_custom_uuid
-for key in AEBDF4819BE21867 9BDB3D89CE49EC21 8065BE1FC67AABDE F02122ECF25FB4D7; do gpg --keyserver keyserver.ubuntu.com --recv-keys $key && gpg --export $key | sudo tee -a $TARGET_ROOTFS_DIR/etc/apt/trusted.gpg.d/custom-keys.gpg > /dev/null; done
 
 # overlay folder
 sudo cp -rf ../overlay/* $TARGET_ROOTFS_DIR/
@@ -67,14 +66,25 @@ ln -s /run/resolvconf/resolv.conf /etc/resolv.conf
 resolvconf -u
 cat /etc/resolv.conf
 
-echo -e "deb http://ppa.launchpad.net/jjriek/panfork-mesa/ubuntu jammy main\ndeb http://ppa.launchpad.net/mozillateam/ppa/ubuntu jammy main" > /etc/apt/sources.list.d/panfork-mesa.list
 apt-get update
 \rm -rf /etc/initramfs/post-update.d/z50-raspi-firmware
-apt-get install -y mali-g610-firmware libmali-g610-x11
-apt-get update
 apt-get upgrade -y
 apt-get dist-upgrade -y
 apt-get install -y build-essential git wget v4l-utils grub-efi-arm64 zstd gdm3
+
+mkdir -p /lib/firmware/arm/mali/arch10.8/
+rm -f /lib/firmware/arm/mali/arch10.8/*
+wget https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/plain/arm/mali/arch10.8/mali_csffw.bin -P /lib/firmware/arm/mali/arch10.8/
+chmod 644 /lib/firmware/arm/mali/arch10.8/mali_csffw.bin
+echo "panthor" | tee /etc/modules-load.d/panthor.conf
+
+# Install mesa 25
+export DEBIAN_FRONTEND=noninteractive
+echo "deb http://deb.debian.org/debian bookworm-backports main" > /etc/apt/sources.list.d/backports.list
+apt update
+apt install -t bookworm-backports -y --no-install-recommends \
+    mesa-vulkan-drivers mesa-va-drivers libgl1-mesa-dri libglx-mesa0 libegl-mesa0 libgbm1 libgles2-mesa
+ldconfig
 
 # Install and configure GRUB
 mkdir -p /boot/efi
@@ -84,13 +94,6 @@ update-grub
 cp /boot/40_custom_uuid /etc/grub.d/
 chmod +x /etc/grub.d/40_custom_uuid
 rm -rf /boot/40_custom_uuid
-
-# Fix mouse lagging issue
-cat << MOUSE_EOF >> /etc/environment
-MUTTER_DEBUG_ENABLE_ATOMIC_KMS=0
-MUTTER_DEBUG_FORCE_KMS_MODE=simple
-CLUTTER_PAINT=disable-dynamic-max-render-time
-MOUSE_EOF
 
 cat << GRUB_EOF > /etc/default/grub
 GRUB_DEFAULT="Boot from UUID"

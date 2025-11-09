@@ -5,15 +5,16 @@ Input files: ../rootfs-ubuntu-noble/linaro-rootfs.img
 
 Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
 sudo ./mksdcardimg.sh
+sudo mount /dev/sda2 /mnt
+sudo cp ./rtlbt/* /mnt/lib/firmware/rtl_bt && sync && sudo umount /mnt
 Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD and wifi usb dongle to SBC.
+Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD and ethernet cable to SBC.
 Esc -> Boot Manager -> ( sdcard, emmc userdata or the last UEFI )
-Run setup
 Login:
 Username: linaro
 Password: linaro
-Setup wifi. Disable power saving and screen saver.
+Disable power saving, auto suspend and screen saver.
 uname -a
 lsb_release -a
 sudo dpkg-reconfigure tzdata
@@ -39,8 +40,8 @@ speedtest-cli --secure
 
 glmark2-es2-wayland
 
-aplay -l
-pavucontrol  ( select card 2 rockchip-hdmi0 as default )
+aplay -l     ( power down / up if no hdmi show up )
+pavucontrol  ( select hdmi0 as default )
 
 sudo add-apt-repository ppa:mozillateam/ppa
 sudo apt update

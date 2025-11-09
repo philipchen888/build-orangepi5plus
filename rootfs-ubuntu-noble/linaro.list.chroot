@@ -173,8 +173,8 @@ ubiquity-ubuntu-artwork
 ubiquity-frontend-gtk
 ubiquity-frontend-kde
 ubiquity-frontend-debconf
-rockchip-multimedia-config
-ubuntu-desktop-rockchip
-gstreamer1.0-rockchip1
+# rockchip-multimedia-config
+# ubuntu-desktop-rockchip
+# gstreamer1.0-rockchip1
 #chromium-browser
-libv4l-rkmpp
+# libv4l-rkmpp

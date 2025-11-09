@@ -23,8 +23,7 @@ Plugin sdcard, usb3 stick  and ethernet cable to opi5+. Power on opi5+.
 
 Select install
 Double click Install Ubuntu LTS icon.
-Erase disk and install Ubuntu.
-Click Install now.
+Manual partition, boot loader mmcblk1, select free space, + mount /, ok 
 Contine till finished. Restart.
 
 Remove usb3 stick from opi5+.

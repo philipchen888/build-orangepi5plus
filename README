@@ -50,56 +50,71 @@ Steps to build orangepi5plus sdcard image:
    The results are in ./linux/tmp/lib/modules/*
                       ./linux/tmp/boot/*
 
-5. cd ~/build-orangepi5plus/rootfs-bookworm  ( Compile debian bookworm rootfs )
+5. cd ~/build-orangepi5plus/linux ( Compile mainline kernel )
+   git clone --depth=1 --branch v6.18-rc4 https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+   vi ./linux/arch/arm64/boot/dts/rockchip/rk3588-base.dtsi ( change gpu )
+   vi ./linux/arch/arm64/configs/defconfig ( enable NVMe )
+
+   make kernel
+
+   The results are in ./linux/tmp/lib/modules/*
+                      ./linux/tmp/boot/*
+
+6. cd ~/build-orangepi5plus/rootfs-bookworm  ( Compile debian bookworm rootfs )
    make rootfs
    The results are in ./linaro-rootfs.img linaro-esp.img
    make clean
 
-6. cd ~/build-orangepi5plus/rootfs-trixie  ( Compile debian trixie rootfs )
+7. cd ~/build-orangepi5plus/rootfs-bookwormgpio  ( Compile debian bookworm rootfs )
    make rootfs
    The results are in ./linaro-rootfs.img linaro-esp.img
    make clean
 
-7. cd ~/build-orangepi5plus/rootfs-ubuntu-noble  ( Compile ubuntu-noble rootfs )
+8. cd ~/build-orangepi5plus/rootfs-trixie  ( Compile debian trixie rootfs )
    make rootfs
    The results are in ./linaro-rootfs.img linaro-esp.img
    make clean
 
-8. cd ~/build-orangepi5plus/rootfs-ubuntu-plucky  ( Compile ubuntu-plucky rootfs )
+9. cd ~/build-orangepi5plus/rootfs-ubuntu-noble  ( Compile ubuntu-noble rootfs )
    make rootfs
    The results are in ./linaro-rootfs.img linaro-esp.img
    make clean
 
-9. cd ~/build-orangepi5plus/bookworm-gnome  ( Build debian bookworm gnome-desktop image )
-   Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
-   sudo ./mksdcardimg.sh
-   Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
+10. cd ~/build-orangepi5plus/rootfs-ubuntu-plucky  ( Compile ubuntu-plucky rootfs )
+    make rootfs
+    The results are in ./linaro-rootfs.img linaro-esp.img
+    make clean
 
-10. cd ~/build-orangepi5plus/trixie-gnome    ( Build debian trixie gnome-desktop image )
+11. cd ~/build-orangepi5plus/bookworm-gnome  ( Build debian bookworm gnome-desktop image )
     Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
     sudo ./mksdcardimg.sh
     Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-11. cd ~/build-orangepi5plus/ubuntu-noble  ( Build ubuntu-noble image )
+12. cd ~/build-orangepi5plus/trixie-gnome    ( Build debian trixie gnome-desktop image )
     Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
     sudo ./mksdcardimg.sh
     Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-12. cd ~/build-orangepi5plus/ubuntu-plucky  ( Build ubuntu-plucky image )
+13. cd ~/build-orangepi5plus/ubuntu-noble  ( Build ubuntu-noble image )
     Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
     sudo ./mksdcardimg.sh
     Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-13. cd ~/build-orangepi5plus/android       ( Build android image )
+14. cd ~/build-orangepi5plus/ubuntu-plucky  ( Build ubuntu-plucky image )
+    Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
+    sudo ./mksdcardimg.sh
+    Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-14. cd ~/build-orangepi5plus/bookworm-flightaware  ( flightaware in bookworm-lxde )
+15. cd ~/build-orangepi5plus/android       ( Build android image )
 
-15. cd ~/build-orangepi5plus/yocto         ( Build yocto desktop image )
+16. cd ~/build-orangepi5plus/bookworm-flightaware  ( flightaware in bookworm )
 
-16. cd ~/build-orangepi5plus/buildroot     ( Build buildroot image )
+17. cd ~/build-orangepi5plus/yocto         ( Build yocto desktop image )
 
-17. cd ~/build-orangepi5plus/bookworm-gpio ( Build bookworm gpio tests )
+18. cd ~/build-orangepi5plus/buildroot     ( Build buildroot image )
 
-18. cd ~/build-orangepi5plus/fedora        ( Build fedora image )
+19. cd ~/build-orangepi5plus/bookworm-gpio ( Build bookworm gpio tests )
 
-19. cd ~/build-orangepi5plus/ubuntu-uefi   ( Build ubuntu-uefi image )
+20. cd ~/build-orangepi5plus/fedora        ( Build fedora image )
+
+21. cd ~/build-orangepi5plus/ubuntu-uefi   ( Build ubuntu-uefi image )
