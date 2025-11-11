@@ -1,8 +1,8 @@
 export OUT=$(PWD)/out
 export ARCH=arm64
-export CROSS_COMPILE=/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
-export ROCKCHIP_TPL=$(PWD)/rkbin/bin/rk35/rk3588_ddr_lp4_2112MHz_lp5_2400MHz_v1.16.bin
-export BL31=$(PWD)/rkbin/bin/rk35/rk3588_bl31_v1.45.elf
+export CROSS_COMPILE=/usr/bin/aarch64-linux-gnu-
+export ROCKCHIP_TPL=$(PWD)/rkbin/bin/rk35/rk3588_ddr_lp4_2112MHz_lp5_2400MHz_v1.19.bin
+export BL31=$(PWD)/rkbin/bin/rk35/rk3588_bl31_v1.51.elf
 
 u-boot: builduboot
 

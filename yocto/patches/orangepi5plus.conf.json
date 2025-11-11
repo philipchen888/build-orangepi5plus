@@ -1,0 +1,106 @@
+{
+    "description": "Poky Yocto build for Orange Pi 5 Plus",
+    "sources": {
+        "bitbake": {
+            "git-remote": {
+                "remotes": {
+                    "origin": {
+                        "uri": "git://git.openembedded.org/bitbake;protocol=https"
+                    }
+                },
+                "branch": "master",
+                "rev": "master"
+            },
+            "path": "bitbake"
+        },
+        "openembedded-core": {
+            "git-remote": {
+                "remotes": {
+                    "origin": {
+                        "uri": "git://git.openembedded.org/openembedded-core;protocol=https"
+                    }
+                },
+                "branch": "master",
+                "rev": "master"
+            },
+            "path": "openembedded-core"
+        },
+        "meta-yocto": {
+            "git-remote": {
+                "remotes": {
+                    "origin": {
+                        "uri": "git://git.yoctoproject.org/meta-yocto;protocol=https"
+                    }
+                },
+                "branch": "master",
+                "rev": "master"
+            },
+            "path": "meta-yocto"
+        },
+        "yocto-docs": {
+            "git-remote": {
+                "remotes": {
+                    "origin": {
+                        "uri": "git://git.yoctoproject.org/yocto-docs;protocol=https"
+                    }
+                },
+                "branch": "master",
+                "rev": "master"
+            },
+            "path": "yocto-docs"
+        },
+        "meta-arm": {
+            "git-remote": {
+                "remotes": {
+                    "origin": {
+                        "uri": "git://git.yoctoproject.org/meta-arm;protocol=https"
+                    }
+                },
+                "branch": "master",
+                "rev": "master"
+            },
+            "path": "meta-arm"
+        },
+        "meta-rockchip": {
+            "git-remote": {
+                "remotes": {
+                    "origin": {
+                        "uri": "git://git.yoctoproject.org/meta-rockchip;protocol=https"
+                    }
+                },
+                "branch": "master",
+                "rev": "master"
+            },
+            "path": "meta-rockchip"
+        },
+        "meta-openembedded": {
+            "git-remote": {
+                "remotes": {
+                    "origin": {
+                        "uri": "git://git.openembedded.org/meta-openembedded;protocol=https"
+                    }
+                },
+                "branch": "master",
+                "rev": "master"
+            },
+            "path": "meta-openembedded"
+        }
+    },
+    "bitbake-setup": {
+        "configurations": [
+            {
+                "bb-layers": ["openembedded-core/meta","meta-yocto/meta-yocto-bsp","meta-yocto/meta-poky","meta-openembedded/meta-oe","meta-openembedded/meta-filesystems","meta-openembedded/meta-networking","meta-openembedded/meta-python","meta-openembedded/meta-multimedia","meta-openembedded/meta-gnome","meta-arm/meta-arm","meta-arm/meta-arm-bsp","meta-arm/meta-arm-toolchain","meta-rockchip"],
+                "configurations": [
+                    {
+                        "name": "orangepi5plus",
+                        "description": "Poky Yocto build for Orange Pi 5 Plus",
+                        "machine": "orangepi-5-plus",
+                        "distro": "poky"
+                    }
+                ]
+            }
+        ]
+    },
+    "version": "1.0"
+}
+

@@ -1,32 +1,38 @@
 Build yocto desktop sdcard image for orangepi 5 plus.
 
-   See ../uboot/README to erase SPI flash.
+   See ../uboot/README to erase SPI flash then install u-boot to SPI flash.
    Note: Need 300GB free space in hard disk since yocto downloads many source files.
 
    mkdir ${HOME}/download
    mkdir ${HOME}/sstate-cache
-   git clone git://git.yoctoproject.org/poky --depth=1 -b master
-   cd poky
-   git clone git://git.openembedded.org/meta-openembedded.git --depth=1 -b master
-   git clone https://github.com/jonmason/meta-arm.git --depth=1 -b master
-   git clone https://git.yoctoproject.org/meta-rockchip.git --depth=1 -b master
-   source oe-init-build-env
-   cd ../../
-   make apply_patches
+   mkdir mypoky; cd mypoky;
+   git clone https://github.com/openembedded/bitbake.git -b master
+   rm -rf ~/bitbake-builds
+   python3 bitbake/bin/bitbake-setup settings set default top-dir $PWD && python3 bitbake/bin/bitbake-setup settings set default top-dir-prefix $PWD && python3 bitbake/bin/bitbake-setup settings set default top-dir-name build && python3 bitbake/bin/bitbake-setup settings set default setup-dir $PWD
 
-   cd poky; source oe-init-build-env;
+   rm -rf build config layers
+   python3 bitbake/bin/bitbake-setup init --setup-dir-name $PWD --non-interactive ../patches/orangepi5plus.conf.json orangepi5plus
+   cp ../patches/local.conf ./build/conf
+   cp ../patches/rockchip.wks ./layers/meta-rockchip/wic
+   cp ../patches/hdmi-audio.cfg ./layers/meta-rockchip/recipes-kernel/linux/linux-yocto
+   vi ./layers/meta-rockchip/recipes-kernel/linux/linux-yocto_%.bbappend ( append
+   SRC_URI:append:rockchip = " file://hdmi-audio.cfg"
+   )
+   . ./build/init-build-env
+
    bitbake -s
    bitbake -c cleansstate u-boot linux-yocto core-image-weston clang
    bitbake -k u-boot
+   bitbake -k clang llvm-native clang-native rust-native
    bitbake -k linux-yocto
-   bitbake -k clang core-image-weston
+   bitbake -k llvm core-image-weston
 
    The result is in ./tmp/deploy/images/orangepi-5-plus/core-image-weston-orangepi-5-plus.rootfs.wic
 
    Plugin sdcard to PC.
    sudo dd if=./tmp/deploy/images/orangepi-5-plus/core-image-weston-orangepi-5-plus.rootfs.wic of=/dev/sda bs=4096 conv=notrunc,fsync
 
-   sudo mount /dev/sda9 /mnt
+   sudo mount /dev/sda1 /mnt
    sudo vi /mnt/etc/network/interfaces ( delete everything after iface lo inet loopback )
    sudo vi /mnt/etc/xdg/weston/weston.ini ( delete everything, add
    [core]
@@ -41,8 +47,7 @@ Build yocto desktop sdcard image for orangepi 5 plus.
    cursor-theme=Adwaita
    cursor-size=16
    )
-   sync
-   sudo umount /mnt
+   sync; sudo umount /mnt;
    Eject sdcard from PC.
 
    \rm -rf ./tmp/work
@@ -67,11 +72,11 @@ cat /proc/asound/cards
 vi /etc/asound.conf ( add
 pcm.!default {
 type hw
-card 1
+card 0
 }
 ctl.!default {
 type hw
-card 1
+card 0
 }
 sync
 reboot
@@ -84,4 +89,4 @@ whoami
 glmark2-es2-wayland
 aplay /home/linaro/yoursong.wav
 mpv --no-video /home/linaro/yoursong.mp3
-mpv /home/linaro/yourvideo.mp4
+mpv -fs /home/linaro/yourvideo.mp4

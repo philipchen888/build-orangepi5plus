@@ -29,17 +29,18 @@ sync
 After step 1,2 done, Boot NVMe without sdcard.
 
 ----------------------------------------------------------------
-wget https://source.denx.de/u-boot/u-boot/-/archive/v2024.07/u-boot-v2024.07.tar.gz
-tar -xzf u-boot-v2024.07.tar.gz
-mv u-boot-v2024.07 u-boot
+
+Mainline u-boot:
+
+git clone --depth=1 -b master https://source.denx.de/u-boot/u-boot.git
 wget https://github.com/rockchip-linux/rkbin/archive/refs/heads/master.tar.gz
 tar -xzf master.tar.gz
 mv rkbin-master rkbin
 make u-boot
 The result is in ./out/u-boot-spi.bin
 
-wget https://github.com/schneid-l/u-boot-orangepi5/releases/download/v1.4/u-boot-orangepi5-plus-spi.bin
-flash u-boot-orangepi5-plus-spi.bin to spi flash:
-sudo dd if=.u-boot-orangepi5-plus-spi.bin of=/dev/mtdblock0 bs=1M seek=0
+flash u-boot-spi.bin to spi flash:
+sudo dd if=./u-boot-spi.bin of=/dev/mtdblock0 bs=1M seek=0
 sync
 
+-----------------------------------------------------------------
