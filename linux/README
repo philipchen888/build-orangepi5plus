@@ -27,5 +27,30 @@ CONFIG_DRM_PANTHOR=m
 CONFIG_DRM_PANFROST=m
 )
 
+vi linux/arch/arm64/boot/dts/rockchip/rk3588-orangepi-5.dtsi ( change to:
+&i2c2 {
+        pinctrl-names = "default";
+        pinctrl-0 = <&i2c2m2_xfer>;
+        status = "okay";
+};
+
+&uart3 {
+        pinctrl-0 = <&uart3m0_xfer>;
+        status = "okay";
+};
+
+&spi0 {
+        status = "okay";
+        spidev@0 {
+                compatible = "cisco,spi-petra";
+                reg = <0>;
+                spi-max-frequency = <10000000>;
+        };
+};
+
+&pwm14 {
+        status = "okay";
+};
+)
 make kernel
 

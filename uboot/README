@@ -32,15 +32,31 @@ After step 1,2 done, Boot NVMe without sdcard.
 
 Mainline u-boot:
 
-git clone --depth=1 -b master https://source.denx.de/u-boot/u-boot.git
-wget https://github.com/rockchip-linux/rkbin/archive/refs/heads/master.tar.gz
-tar -xzf master.tar.gz
-mv rkbin-master rkbin
+git clone https://github.com/radxa/rkbin.git -b master --tags develop-v20240301
+mv develop-v20240301 rkbin
+git clone https://github.com/orangepi-xunlong/u-boot-orangepi -b v2024.01 --depth=1
+mv u-boot-orangepi u-boot
+vi ./u-boot/configs/orangepi-5-plus-rk3588_defconfig ( append
+CONFIG_BOOTMETH_EXTLINUX=y
+CONFIG_BOOTMETH_EXTLINUX_PXE=y
+)
 make u-boot
-The result is in ./out/u-boot-spi.bin
-
-flash u-boot-spi.bin to spi flash:
-sudo dd if=./u-boot-spi.bin of=/dev/mtdblock0 bs=1M seek=0
-sync
+The resulta are in ./out/idbloader.img
+                        /u-boot.itb
 
 -----------------------------------------------------------------
+
+Recover spi flash when bricked:
+
+1. On ubuntu PC sudo apt install rkdeveloptool
+2. Download MiniLoaderAll.bin from https://drive.google.com/drive/folders/19SMZHj1Y8l_Vvr6_SMDHYdJHi41hMgsI
+
+3. On orangepi5+ Press and hold the MASKROM button, then plug in USB power and release the MASKROM button
+4. plug in USB cable from PC to the USB-C connector opposite the power. lsusb
+5. sudo rkdeveloptool ld                     ( list sevices )
+6. sudo rkdeveloptool db MiniLoaderAll.bin   ( DownloadBoot )
+7. sudo rkdeveloptool ul MiniLoaderAll.bin   ( UpgradeLoader )
+8. sudo rkdeveloptool td                     ( TestDevice )
+9. sudo rkdeveloptool rd                     ( ResetDevice )
+10. Power off orangepi5+
+----------------------------------------------------------------------

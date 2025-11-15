@@ -34,8 +34,8 @@ wget http://www.orangepi.org/orangepiwiki/images/a/ac/Plus5-img302.png
 wget http://www.orangepi.org/orangepiwiki/images/5/53/Plus5-img184.png
 wget http://www.orangepi.org/orangepiwiki/images/6/6c/Plus5-img308.png
 
-Input files: ../rootfs-bookwormgpio/linaro-rootfs.img
-                                   /linaro-esp.img
+Input files: ../rootfs-bookworm/linaro-rootfs.img
+                               /linaro-esp.img
 
 Plugin sdcard to PC.
 sudo ./mksdcardimg.sh
