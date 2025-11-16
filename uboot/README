@@ -39,6 +39,10 @@ mv u-boot-orangepi u-boot
 vi ./u-boot/configs/orangepi-5-plus-rk3588_defconfig ( append
 CONFIG_BOOTMETH_EXTLINUX=y
 CONFIG_BOOTMETH_EXTLINUX_PXE=y
+CONFIG_BOOTSTD=y
+CONFIG_BOOTSTD_FULL=y
+CONFIG_BOOTFLOW=y
+CONFIG_BOOTFLOW_FULL=y
 )
 make u-boot
 The resulta are in ./out/idbloader.img
