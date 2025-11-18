@@ -1,5 +1,17 @@
+/* gpio_test.c
+ *
+ * Compile:
+ *   gcc -o gpio_test gpio_test.c -lgpiod
+ *
+ * Run:
+ *   sudo ./gpio_test
+ *
+ * Note: keep SPI device path as appropriate (/dev/spidev2.0 in your setup).
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
 #include <sys/types.h>
@@ -11,9 +23,14 @@
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
 #include <linux/spi/spidev.h>
+#include <gpiod.h>
 
 #define TRUE    (1==1)
 #define FALSE   (!TRUE)
+
+#define CHIP_NAME   "gpiochip1"
+#define LED_OFFSET  0   /* global 32 */
+#define SW_OFFSET   1   /* global 33 */
 
 //----- UART ---------------------------------------------
 
@@ -41,7 +58,7 @@ int uart_test( void ) {
     int k;
     int fd;
     speed_t speed;
- 
+
     fd = open("/dev/ttyS3", O_RDWR | O_NOCTTY );
     fcntl(fd, F_SETFL, 0);
     tcgetattr(fd, &tty);
@@ -56,7 +73,7 @@ int uart_test( void ) {
     tty.c_iflag = IGNPAR;
     tty.c_oflag = 0;
     tty.c_lflag = 0;
- 
+
     if (tcsetattr (fd, TCSANOW, &tty) != 0)
     {
         fprintf (stderr, "error %d from tcsetattr", errno);
@@ -69,114 +86,14 @@ int uart_test( void ) {
     tcflush(fd, TCIFLUSH);
 
     for ( k = '0'; k <= '~'; k++ ) {
-	char i[3] = "9\r\n";
-	i[0] = k;
+        char i[3] = "9\r\n";
+        i[0] = k;
         write(fd, &i[0], sizeof i);
-	char *j = readLine(fd);
+        char *j = readLine(fd);
         printf("%s", j);
     }
     printf("\n");
     close(fd);
-    return 0;
-}
-
-//----- LED and BUTTON ----------------------------
-
-void initpin( int pin, char *mode )
-{
-    FILE *fp;
-    bool isdir;
-    char path[100] = "";
-    char direction[100] = "";
-    sprintf( path, "/sys/class/gpio/gpio%d", pin );
-    sprintf( direction, "/sys/class/gpio/gpio%d/direction", pin );
-    struct stat st = {0};
-    if ( !stat(path, &st) ) {
-        isdir = S_ISDIR( st.st_mode );
-    }
-    if ( !isdir ) {
-        fp = fopen( "/sys/class/gpio/export", "w" );
-        fprintf( fp, "%d", pin );
-        fclose( fp );
-        fp = fopen( direction, "w" );
-        fprintf( fp, "%s", mode );
-        fclose( fp );
-    }
-}
-
-void setpin( int pin, int value )
-{
-    FILE *fp;
-    char pinvalue[100] = "";
-    sprintf( pinvalue, "/sys/class/gpio/gpio%d/value", pin );
-    fp = fopen( pinvalue, "w" );
-    fprintf( fp, "%d", value );
-    fclose( fp );
-}
-
-int getpin( int pin )
-{
-    FILE *fp;
-    int value;
-    char pinvalue[100] = "";
-    sprintf( pinvalue, "/sys/class/gpio/gpio%d/value", pin );
-    fp = fopen( pinvalue, "r" );
-    fscanf( fp, "%d", &value );
-    fclose( fp );
-    return ( value );
-}
-
-void closepin( int pin )
-{
-    FILE *fp;
-    fp = fopen( "/sys/class/gpio/unexport", "w" );
-    fprintf( fp, "%d", pin );
-    fclose( fp );
-}
-
-int led_test(void) {
-    int i;
-
-    printf("led test, blink led 5 times.\n");
-    initpin( 32, "out" );
-
-    for ( i = 0; i < 5; i++ ) {
-        setpin( 32, 1 );
-        sleep( 1 );
-        setpin( 32, 0 );
-        sleep( 1 );
-    }
-
-    closepin( 32 );
-    return 0;
-}
-
-int button_test( void )
-{
-    int i;
-    int old_state;
-    int current_state;
-    printf( "Push button 10 times.\n" );
-    initpin( 32, "out" );
-    initpin( 33, "in" );
-
-    old_state = 0;
-    current_state = 0;
-    for ( i = 0; i < 10; ) {
-        current_state = getpin( 33 );
-        if ( old_state == 0 && current_state == 1 ) {
-            setpin( 32, 1 );
-            old_state = current_state;
-        } else if ( old_state == 1 && current_state == 0 ) {
-            setpin( 32, 0 );
-            old_state = current_state;
-            i++;
-        }
-        usleep( 100000 );
-    }
-
-    closepin( 32 );
-    closepin( 33 );
     return 0;
 }
 
@@ -210,7 +127,7 @@ void pwm_polarity( void )
 void pwm_enable( void )
 {
     FILE *fp;
-    fp = fopen( "/sys/class/pwm/pwmchip2/pwm0/enable", "w" ); 
+    fp = fopen( "/sys/class/pwm/pwmchip2/pwm0/enable", "w" );
     fprintf( fp, "%d", 1 );
     fclose( fp );
 }
@@ -236,7 +153,7 @@ int pwm_freq( int freq )
     FILE *fp;
     int pwm_period;
     pwm_period = 1000000000.0 / freq;
-    fp = fopen( "/sys/class/pwm/pwmchip2/pwm0/period", "w" ); 
+    fp = fopen( "/sys/class/pwm/pwmchip2/pwm0/period", "w" );
     fprintf( fp, "%d", pwm_period );
     fclose( fp );
     return ( pwm_period );
@@ -246,7 +163,7 @@ void pwm_duty( float duty, int pwm_period )
 {
     FILE *fp;
     int dutycycle;
-    dutycycle = duty * pwm_period; 
+    dutycycle = duty * pwm_period;
     fp = fopen( "/sys/class/pwm/pwmchip2/pwm0/duty_cycle", "w" );
     fprintf( fp, "%d", dutycycle );
     fclose( fp );
@@ -286,7 +203,7 @@ void tong( int note, int duration )
     extra = duration / 5;
     if ( note == 0 ) {
         usleep( duration );
-        usleep( extra ); 
+        usleep( extra );
     } else {
         pwm_period = pwm_freq( note );
         pwm_duty( 0.5, pwm_period );
@@ -454,6 +371,7 @@ int i2c_lcd_test ( void )
  
     i2c_init(fd);
     i2c_clear(fd);
+    sleep( 1 );
     i2c_write(fd, 4, 0, "Hello world !");
     i2c_write(fd, 7, 1, "It works !"); 
     i2c_write(fd, 3, 2, "This is a test.");
@@ -564,291 +482,295 @@ static const unsigned char font7x14[] = {
   0XFE,0XFE,0XFE,0XFE,0XFE,0XFE,0X3F,0X3F,0X3F,0X3F,0X3F,0X3F   // del
 };
 
-void spi_write( int spi, unsigned char *dout, int len )
-{  
-    u_int8_t buf[len];
-    int status;
-    int i;
+/* SPI helper: write `len` bytes from dout to spi_fd using SPI_IOC_MESSAGE */
+void spi_write(int spi_fd, const uint8_t *dout, size_t len)
+{
     struct spi_ioc_transfer xfer;
-
     memset(&xfer, 0, sizeof(xfer));
+    xfer.tx_buf = (unsigned long)dout;
+    xfer.rx_buf = (unsigned long)NULL;
+    xfer.len = len;
+    xfer.delay_usecs = 0;
+    xfer.speed_hz = 5000000;
+    xfer.bits_per_word = 8;
 
-    for ( i = 0; i < len; i++ )
-        buf[i] = dout[i];
-    xfer.cs_change = 0;
-    xfer.delay_usecs = 0;          //delay in us
-    xfer.speed_hz = 5000000;       //speed
-    xfer.bits_per_word = 8;        // bites per word 8
-    xfer.tx_buf = (unsigned long )buf;
-    xfer.rx_buf = (unsigned long )NULL;
-    xfer.len = sizeof buf;
-    status = ioctl( spi, SPI_IOC_MESSAGE(1), &xfer );
-    if ( status < 0 ) {
-        printf("SPI_IOC_MESSAGE");
+    if (ioctl(spi_fd, SPI_IOC_MESSAGE(1), &xfer) < 0) {
+        fprintf(stderr, "spi_write: SPI_IOC_MESSAGE failed: %s\n", strerror(errno));
     }
 }
 
-void ssd1306_init( int spi )
+/* Simplified SSD1306 routines that toggle the LED (led_line) while writing */
+void ssd1306_init(int spi_fd, struct gpiod_line *led_line)
 {
-    unsigned char myData[] = {0xa8, 0x3f, 0xd3, 0x0, 0x40, 0xa0, 0xc0, 0xda, 0x2, 0x81, 0x7f, 0xa4, 0xa6, 0xd5, 0x80, 0x8d, 0x14, 0xaf};
+    const uint8_t init_cmds[] = {
+        0xa8, 0x3f, 0xd3, 0x00, 0x40, 0xa0, 0xc0,
+        0xda, 0x02, 0x81, 0x7f, 0xa4, 0xa6, 0xd5,
+        0x80, 0x8d, 0x14, 0xaf
+    };
 
-    setpin( 32, 0);
-    spi_write( spi, myData, 18 );
+    /* If led_line is valid, ensure LED off during SPI control commands */
+    if (led_line) gpiod_line_set_value(led_line, 0);
+    spi_write(spi_fd, init_cmds, sizeof(init_cmds));
 }
 
-void set_col_addr( int spi, int col_start, int col_end )
+void set_col_addr(int spi_fd, struct gpiod_line *led_line, int start, int end)
 {
-    unsigned char myData[3];
-
-    setpin( 32, 0) ;
-
-    myData[0] = 0x21;
-    myData[1] = col_start & 0x7f;
-    myData[2] = col_end & 0x7f;
-    spi_write( spi, myData, 3 );
+    uint8_t cmd[3];
+    if (led_line) gpiod_line_set_value(led_line, 0);
+    cmd[0] = 0x21;
+    cmd[1] = start & 0x7f;
+    cmd[2] = end & 0x7f;
+    spi_write(spi_fd, cmd, 3);
 }
 
-void set_page_addr( int spi, int page_start, int page_end )
+void set_page_addr(int spi_fd, struct gpiod_line *led_line, int start, int end)
 {
-    unsigned char myData[3];
-
-    setpin( 32, 0) ;
-
-    myData[0] = 0x22;
-    myData[1] = page_start & 0x3;
-    myData[2] = page_end & 0x3;
-    spi_write( spi, myData, 3 );
+    uint8_t cmd[3];
+    if (led_line) gpiod_line_set_value(led_line, 0);
+    cmd[0] = 0x22;
+    cmd[1] = start & 0x03;
+    cmd[2] = end & 0x03;
+    spi_write(spi_fd, cmd, 3);
 }
 
-void set_horizontal_mode( int spi )
+void set_horizontal_mode(int spi_fd, struct gpiod_line *led_line)
 {
-    unsigned char myData[2];
-
-    setpin( 32, 0) ;
-
-    myData[0] = 0x20;
-    myData[1] = 0x00;
-    spi_write( spi, myData, 2 );
+    uint8_t cmd[2];
+    if (led_line) gpiod_line_set_value(led_line, 0);
+    cmd[0] = 0x20;
+    cmd[1] = 0x00;
+    spi_write(spi_fd, cmd, 2);
 }
 
-void set_start_page( int spi, int page )
+void clearDisplay(int spi_fd, struct gpiod_line *led_line)
 {
-    unsigned char myData[1];
+    int j, k, i;
+    set_col_addr(spi_fd, led_line, 0, 127);
+    set_page_addr(spi_fd, led_line, 0, 3);
 
-    setpin( 32, 0) ;
-
-    myData[0] = 0xB0 | (page & 0x3);
-    spi_write( spi, myData, 1 );
-}
-
-void set_start_col( int spi, int col )
-{
-    unsigned char myData[2];
-
-    setpin( 32, 0) ;
-
-    myData[0] = 0xf & col;
-    myData[1] = (0xf & (col >> 4)) | 0x10;
-    spi_write( spi, myData, 2 );
-}
-
-void clearDisplay( int spi )
-{
-    int i;
-    int j;
-    int k;
-
-    set_col_addr( spi, 0, 127 );
-    set_page_addr( spi, 0, 3 );
-    setpin( 32, 1 );
-    for (j=0; j<4; j++) {
-        for (k=0; k<8; k++) {
-            unsigned char myData[16];
-            for (i=0; i < 16; i++) {
-                myData[i] = 0;
-            }
-            spi_write( spi, myData, 16 );
+    for (j = 0; j < 4; j++) {
+        for (k = 0; k < 8; k++) {
+            uint8_t zeros[16];
+            memset(zeros, 0x00, sizeof(zeros));
+            if (led_line) gpiod_line_set_value(led_line, 1);
+            spi_write(spi_fd, zeros, sizeof(zeros));
         }
     }
 }
 
-void oledprintf( int spi, unsigned char *ch )
+/* Small-ish oled write that uses your 7x14 font (kept compact) */
+void oledprintf(int spi_fd, struct gpiod_line *led_line, const char *s)
 {
-  int i;
-  int j;
-  int start_col;
-  int end_col;
-  int tmp;
-  int tmp1;
-  int page2_3;
+    int start_col = 0;
+    int page2_3 = 0;
 
-  start_col = 0;
-  page2_3 = 0;
+    for (size_t j = 0; s[j] != '\0'; j++) {
+        if (s[j] == '\n' || s[j] == '\r') {
+            page2_3 = 1;
+            start_col = 0;
+            continue;
+        }
+        unsigned char mychar[12];
+        int tmp = (int)s[j] - ' ';
+        if (tmp < 0) tmp = 0;
+        int idx = tmp * 12;
+        for (int i = 0; i < 12; i++) mychar[i] = font7x14[idx + i];
 
-  for (j=0; ch[j] != '\0'; j++) {
-      if (ch[j] != '\n' && ch[j] != '\r') {
-          unsigned char mychar[12];
-          tmp = ch[j] - ' ';
-          tmp1 = (tmp << 3) + (tmp << 2);  // tmp x 12
-          for (i=0; i< 12; i++) {
-              mychar[i] = font7x14[tmp1];
-              tmp1++;
-          }
-          end_col = start_col + 5;
-          set_col_addr( spi, start_col, end_col );
-          if (page2_3 == 0) {
-              set_page_addr( spi, 0, 1 );
-          } else {
-              set_page_addr( spi, 2, 3 );
-          }
-          setpin( 32, 1 );
-          spi_write( spi, mychar, 12 );
-          start_col += 7;
-      } else {
-          page2_3 = 1;
-          start_col = 0;
-      }
-  }
+        int end_col = start_col + 5;
+        set_col_addr(spi_fd, led_line, start_col, end_col);
+        if (!page2_3)
+            set_page_addr(spi_fd, led_line, 0, 1);
+        else
+            set_page_addr(spi_fd, led_line, 2, 3);
+
+        if (led_line) gpiod_line_set_value(led_line, 1);
+        spi_write(spi_fd, mychar, sizeof(mychar));
+        start_col += 7;
+    }
 }
 
-void oledascii( int spi )
+/* Write some ASCII patterns - simplified from your original */
+void oledascii(int spi_fd, struct gpiod_line *led_line)
 {
-    int i;
-    int j;
-    int k;
-    int start_col;
-    int end_col;
-    int tmp;
-    int tmp1;
-  
-    for (k=0; k < 3; k++) {
-        start_col = 0;
-        for (j=0; j < 32; j++) {             // 16 characters per two pages
+    for (int k = 0; k < 3; k++) {
+        int start_col = 0;
+        for (int j = 0; j < 32; j++) {
             unsigned char mychar[12];
-            tmp = j + (k << 5);
-            tmp1 = (tmp << 3) + (tmp << 2);  // tmp x 12
-            for (i=0; i< 12; i++) {
-                mychar[i] = font7x14[tmp1];
-                tmp1++;
-            }
-            end_col = start_col + 5;
-            set_col_addr( spi, start_col, end_col );
-            if (j < 16) {
-                set_page_addr( spi, 0, 1 );
-            } else {
-                set_page_addr( spi, 2, 3 );
-            }
-            setpin( 32, 1 );
-            spi_write( spi, mychar, 12 );
+            int tmp = j + (k << 5);
+            int idx = tmp * 12;
+            for (int i = 0; i < 12; i++) mychar[i] = font7x14[idx + i];
+            int end_col = start_col + 5;
+            set_col_addr(spi_fd, led_line, start_col, end_col);
+            if (j < 16)
+                set_page_addr(spi_fd, led_line, 0, 1);
+            else
+                set_page_addr(spi_fd, led_line, 2, 3);
+            if (led_line) gpiod_line_set_value(led_line, 1);
+            spi_write(spi_fd, mychar, sizeof(mychar));
             start_col += 7;
-            if ( start_col >= 112 ) {
-                start_col = 0;
-            }
+            if (start_col >= 112) start_col = 0;
         }
-        sleep( 2 );
-        clearDisplay( spi );
+        sleep(2);
+        clearDisplay(spi_fd, led_line);
     }
 }
 
-int ssd1306_test( void )
+/* LED blinking test using gpiod_line */
+int led_test(struct gpiod_line *led_line)
 {
-    int spi;
-    int i;
-    int j;
-    u_int8_t mode = 0;
-    u_int32_t speed = 5000000;
-    u_int8_t bits = 8;
-
-    initpin( 32, "out" ); 
-    setpin( 32, 1 );
-    if ((spi = open( "/dev/spidev0.0", O_RDWR )) < 0) {
-        printf("Failed to open the bus.");
-        exit( 1 );
+    if (!led_line) return -1;
+    puts("LED test: blink 5 times.");
+    for (int i = 0; i < 5; ++i) {
+        gpiod_line_set_value(led_line, 1);
+        sleep(1);
+        gpiod_line_set_value(led_line, 0);
+        sleep(1);
     }
-    if (ioctl( spi, SPI_IOC_WR_MODE, &mode )<0) {
-	printf("can't set spi mode");
-	return 1;
-    }
-    if (ioctl( spi, SPI_IOC_WR_BITS_PER_WORD, &bits )<0) { 
-        printf("can't set bits per word");
-	return 1;
-    }
-    if (ioctl( spi, SPI_IOC_WR_MAX_SPEED_HZ, &speed )<0) { 
-        printf("can't set max speed hz");
-        return 1;
-    }
-
-    ssd1306_init( spi );
-  
-    //set_page_mode();
-    set_horizontal_mode( spi );
-    set_col_addr( spi, 0, 127 );
-    set_page_addr( spi, 0, 3 );
-  
-    setpin( 32, 1 );
-    for (j=0; j < 4; j++) {
-        for (i=0; i < 128; i=i+8) {
-	    unsigned char myData[] = {0x81, 0x42, 0x24, 0x18, 0x18, 0x24, 0x42, 0x81};
-            spi_write( spi, myData, 8 );
-        }
-    }
-  
-    sleep( 2 );
-    clearDisplay( spi );
-    oledascii( spi );
-    sleep( 2 );
-    clearDisplay( spi );
-    oledprintf( spi, "This is a test !\nIt works !\n" );
-
-    closepin( 32 );
-    close( spi );
     return 0;
 }
 
+/* Button press test: expects transition 0->1->0 to count as a press */
+int button_test(struct gpiod_line *led_line, struct gpiod_line *sw_line)
+{
+    if (!led_line || !sw_line) return -1;
+    puts("Button test: push button 10 times.");
+    int old_state = 0, current_state = 0;
+    for (int count = 0; count < 10; ) {
+        int v = gpiod_line_get_value(sw_line);
+        if (v < 0) {
+            fprintf(stderr, "button_test: read failed: %s\n", strerror(errno));
+            return -1;
+        }
+        current_state = v;
+        if (old_state == 0 && current_state == 1) {
+            gpiod_line_set_value(led_line, 1);
+            old_state = current_state;
+        } else if (old_state == 1 && current_state == 0) {
+            gpiod_line_set_value(led_line, 0);
+            old_state = current_state;
+            count++;
+            printf("Detected press %d/10\n", count);
+        }
+        usleep(100000);
+    }
+    return 0;
+}
 
-//------ GPIO_TEST ----------------------------------
+int ssd1306_test(struct gpiod_line *led_line)
+{
+    const char *spi_dev = "/dev/spidev0.0"; /* adjust if needed */
+    int spi_fd = open(spi_dev, O_RDWR);
+    if (spi_fd < 0) {
+        fprintf(stderr, "ssd1306_test: open(%s) failed: %s\n", spi_dev, strerror(errno));
+        return -1;
+    }
 
-char test_menu( void )
+    uint8_t mode = 0;
+    uint8_t bits = 8;
+    uint32_t speed = 5000000;
+
+    if (ioctl(spi_fd, SPI_IOC_WR_MODE, &mode) < 0 ||
+        ioctl(spi_fd, SPI_IOC_WR_BITS_PER_WORD, &bits) < 0 ||
+        ioctl(spi_fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed) < 0)
+    {
+        fprintf(stderr, "ssd1306_test: failed to configure SPI: %s\n", strerror(errno));
+        close(spi_fd);
+        return -1;
+    }
+
+    if (led_line) gpiod_line_set_value(led_line, 1);
+    ssd1306_init(spi_fd, led_line);
+    set_horizontal_mode(spi_fd, led_line);
+    set_col_addr(spi_fd, led_line, 0, 127);
+    set_page_addr(spi_fd, led_line, 0, 3);
+
+    /* Some pattern */
+    for (int page = 0; page < 4; page++) {
+        for (int i = 0; i < 128; i += 8) {
+            uint8_t pattern[8] = {0x81, 0x42, 0x24, 0x18, 0x18, 0x24, 0x42, 0x81};
+            if (led_line) gpiod_line_set_value(led_line, 1);
+            spi_write(spi_fd, pattern, sizeof(pattern));
+        }
+    }
+
+    sleep(2);
+    clearDisplay(spi_fd, led_line);
+    oledascii(spi_fd, led_line);
+    sleep(2);
+    clearDisplay(spi_fd, led_line);
+    oledprintf(spi_fd, led_line, "This is a test !\nIt works !");
+    close(spi_fd);
+    return 0;
+}
+
+/* Simple menu routine */
+char test_menu(void)
 {
     char ch;
-
-    printf( "--- select a test ---\n" );
-    printf( "1. uart test\n2. led test\n3. button test\n4. pwm led test\n5. i2c lcd test\n6. tongsong\n7. servo\n8. spi oled test\nq. quit\n");
+    puts("\n--- select a test ---");
+    puts("1. uart test");
+    puts("2. led test");
+    puts("3. button test");
+    puts("4. pwm led test");
+    puts("5. i2c lcd test");
+    puts("6. tongsong");
+    puts("7. servo");
+    puts("8. spi oled test");
+    puts("q. quit");
     ch = getchar();
-    getchar();
-    if ( ch == 'q' )
-        printf( "Goodbye !\n" );
+    /* consume newline */
+    while (getchar() != '\n') ;
+    if (ch == 'q') puts("Goodbye!");
     return ch;
 }
 
-int main(void) {
-    char ch;
-    char test_item;
+int main(void)
+{
+    struct gpiod_chip *chip = NULL;
+    struct gpiod_line *led = NULL;
+    struct gpiod_line *sw = NULL;
 
-    test_item = '\0';
-    while( test_item != 'q' ) {
-        test_item = test_menu();
-        if ( test_item == '1' ) {
-            uart_test();
-        } else if ( test_item == '2' ) {
-            led_test();
-        } else if ( test_item == '3' ) {
-            button_test();
-        } else if ( test_item == '4' ) {
-            pwm_led_test();
-        } else if ( test_item == '5' ) {
-            i2c_lcd_test();
-            printf( "press x to exit i2c lcd test\n" );
-            ch = getchar();
-            getchar();
-        } else if ( test_item == '6' ) {
-            tongsong();
-        } else if ( test_item == '7' ) {
-            servo();
-        } else if ( test_item == '8' ) {
-            ssd1306_test();
+    chip = gpiod_chip_open_by_name(CHIP_NAME);
+    if (!chip) {
+        perror("gpiod_chip_open_by_name");
+        return EXIT_FAILURE;
+    }
+
+    led = gpiod_chip_get_line(chip, LED_OFFSET);
+    if (!led) { perror("gpiod_chip_get_line (LED)"); goto cleanup; }
+    if (gpiod_line_request_output(led, "gpio_test", 0) < 0) {
+        perror("gpiod_line_request_output");
+        goto cleanup;
+    }
+
+    sw = gpiod_chip_get_line(chip, SW_OFFSET);
+    if (!sw) { perror("gpiod_chip_get_line (SW)"); goto cleanup; }
+    if (gpiod_line_request_input(sw, "gpio_test") < 0) {
+        perror("gpiod_line_request_input");
+        goto cleanup;
+    }
+
+    char choice = '\0';
+    while (choice != 'q') {
+        choice = test_menu();
+        switch (choice) {
+            case '1': uart_test(); break;
+            case '2': led_test(led); break;
+            case '3': button_test(led, sw); break;
+            case '4': pwm_led_test(); break;
+            case '5': i2c_lcd_test(); break;
+            case '6': tongsong(); break;
+            case '7': servo(); break;
+            case '8': ssd1306_test(led); break;
+            case 'q': break;
+            default: puts("Unknown selection"); break;
         }
     }
 
+cleanup:
+    if (led) gpiod_line_release(led);
+    if (sw) gpiod_line_release(sw);
+    if (chip) gpiod_chip_close(chip);
     return 0;
 }
+

@@ -16,17 +16,16 @@ CONFIG_PHY_ROCKCHIP_INNO_HDMI=y
 
 vi linux/arch/arm64/boot/dts/rockchip/rk3588-orangepi-5.dtsi ( change to:
 &i2c2 {
-        pinctrl-names = "default";
-        pinctrl-0 = <&i2c2m2_xfer>;
         status = "okay";
 };
 
 &uart3 {
-        pinctrl-0 = <&uart3m0_xfer>;
         status = "okay";
 };
 
 &spi0 {
+        pinctrl-names = "default";
+        pinctrl-0 = <&spi0m2_cs0 &spi0m2_cs1 &spi0m2_pins>;
         status = "okay";
         spidev@0 {
                 compatible = "cisco,spi-petra";
@@ -36,6 +35,8 @@ vi linux/arch/arm64/boot/dts/rockchip/rk3588-orangepi-5.dtsi ( change to:
 };
 
 &pwm14 {
+        pinctrl-names = "default";
+        pinctrl-0 = <&pwm14m2_pins>;
         status = "okay";
 };
 )

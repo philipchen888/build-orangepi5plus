@@ -32,7 +32,7 @@ void loop(void) {
     uint8_t data[16];
     printf("wait for a tag\n");
     // wait until a tag is present
-    while (!readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 200, false)) { delay( 1 ); }
+    while (!readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 200, false)) { usleep( 1000 ); }
 
     // if NTAG21x enables r/w protection, uncomment the following line 
     // nfc.ntag21x_auth(password);

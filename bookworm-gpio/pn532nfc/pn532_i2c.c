@@ -8,13 +8,6 @@ int fd;
 #define DATA_WRITE 1
 #define DATA_READ 3
 
-void delay(int numseconds)
-{
-    int milliseconds = 1000 * numseconds;
-    clock_t start_time = clock();
-    while (clock() < start_time + milliseconds);
-}
-
 void i2c_write( unsigned char *dout, int len )
 {
     usleep( 100 );
@@ -111,7 +104,7 @@ int16_t readResponse(uint8_t buf[], uint8_t len, uint16_t timeout)
 
             result = length;
         }
-        delay(1);
+        usleep( 1000 );
         time++;
         if (time > timeout)
         {
@@ -184,7 +177,7 @@ int8_t readAckFrame()
     {
         i2c_read( packet, sizeof(PN532_ACK) + 1 );
         status = packet[0] & 0x1;
-        delay( 1 );
+        usleep( 1000 );
         timeout--;
         if (0 == timeout)
         {

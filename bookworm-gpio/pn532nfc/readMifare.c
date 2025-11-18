@@ -132,7 +132,7 @@ void loop(void) {
               printf("\n");
 		  
               // Wait a bit before reading the card again
-              delay(100);
+              usleep( 100000 );
             }
             else
             {
@@ -168,7 +168,7 @@ void loop(void) {
         printf("\n");
 		
         // Wait a bit before reading the card again
-        delay(100);
+        usleep( 100000 );
       }
       else
       {

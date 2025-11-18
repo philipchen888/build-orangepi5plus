@@ -46,13 +46,6 @@ uint8_t BitReverseTable[256] =
 0x1f, 0x9f, 0x5f, 0xdf, 0x3f, 0xbf, 0x7f, 0xff
 };
 
-void delay(int numseconds)
-{
-    int milliseconds = 1000 * numseconds;
-    clock_t start_time = clock();
-    while (clock() < start_time + milliseconds);
-}
-
 int spiSetup( void )
 {
     uint8_t mode = 0;

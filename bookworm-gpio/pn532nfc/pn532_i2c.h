@@ -10,11 +10,9 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <time.h>
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
 
-//#include <wiringPi.h>
 // #include <wiringPiSPI.h>
 
 #define TRUE    (1==1)
@@ -38,7 +36,6 @@
 #define PN532_INVALID_FRAME           (-3)
 #define PN532_NO_SPACE                (-4)
 
-void delay(int numseconds);
 void begin( void );
 void wakeup( void );
 void i2c_write( unsigned char *dout, int len );

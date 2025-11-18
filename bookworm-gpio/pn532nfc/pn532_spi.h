@@ -13,7 +13,6 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <time.h>
 #include <sys/ioctl.h>
 #include <linux/types.h>
 #include <linux/spi/spidev.h>
@@ -40,7 +39,6 @@
 #define PN532_INVALID_FRAME           (-3)
 #define PN532_NO_SPACE                (-4)
 
-void delay( int numseconds );
 int spiSetup( void );
 void spi_write( unsigned char *dout, int len );
 void begin( void );
