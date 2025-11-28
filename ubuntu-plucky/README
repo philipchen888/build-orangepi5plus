@@ -40,6 +40,9 @@ speedtest-cli --secure
 
 glmark2-es2-wayland
 
+systemctl --user restart pipewire
+systemctl --user restart wireplumber
+sudo systemctl restart alsa-restore
 aplay -l     ( power down / up if no hdmi show up )
 pavucontrol  ( select hdmi0 as default )
 

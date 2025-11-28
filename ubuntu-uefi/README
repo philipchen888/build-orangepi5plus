@@ -1,6 +1,10 @@
 Build ubuntu-uefi sdcard image for orangepi5 plus:
 
-Install ubuntu from usb3 stick ubuntu iso to empty sdcard.
+Install ubuntu from usb3 stick ubuntu iso to empty NVMe-SSD.
+
+Input files: ../linux/linux/tmp/lib/modules
+             ../linux/linux/arch/arm64/boot/Image
+             ../linux/linux/arch/arm64/boot/dts/rockchip/rk3588-orangepi-5-plus.dtb
 
 cd ~/Downloads
 wget https://cdimage.ubuntu.com/releases/25.10/release/ubuntu-25.10-desktop-arm64.iso
@@ -15,18 +19,54 @@ sudo mount /dev/sda1 /mnt
 sudo 7z x ~/Downloads/ubuntu-25.10-desktop-arm64.iso -o/mnt && sync && sudo umount /mnt
 Eject usb3 stick from PC.
 
-Plugin sdcard to PC.
-sudo ./mksdcard.sh
-Eject sdcard from PC.
+Plugin NVMe-SSD to PC.
+sudo ./mknvme.sh
+Eject NVMe-SSD from PC.
 
-Plugin sdcard, usb3 stick  and ethernet cable to opi5+. Power on opi5+.
+Plugin NVMe-SSD, usb3 stick and ethernet cable to opi5+. Power on opi5+.
 
 Select install
 Double click Install Ubuntu LTS icon.
-Manual partition, boot loader mmcblk1, select free space, + mount /, ok 
+Erase disk.
 Contine till finished. Restart.
 
 Remove usb3 stick from opi5+.
+Plugin NVMe-SSD to PC.
+sudo fdisk -l /dev/sda
+sudo e2label /dev/sda2 rootfs
+sudo blkid /dev/sda1 ( write down UUID )
+sudo blkid /dev/sda2 ( write down UUID )
+sudo mount /dev/sda2 /mnt
+sudo cp -r ../linux/linux/tmp/lib/modules/* /mnt/lib/modules
+sudo cp -r ../linux/linux/tmp/boot/* /mnt/boot
+ls -la /mnt/boot
+sudo touch /mnt/boot/grub/grub.cfg
+sudo vi /mnt/boot/grub/grub.cfg ( delete everything, add
+set timeout=5
+set default="Boot UUID"
+set menu_color_normal=white/black
+set menu_color_highlight=white/green
+set root=(nvme0n1,gpt2)
+
+menuentry "Boot UUID" {
+    search --no-floppy --fs-uuid --set=root --hint='usb0,gpt2' --hint='mmcblk1,gpt2' --hint='nvme0n1,gpt2' 2020452e-0378-417c-8599-0a5b2ae489a3
+    echo    'Loading Linux 6.18.0-rc4-dirty ...'
+    linux /boot/vmlinuz-6.18.0-rc4-dirty root=LABEL=rootfs rootwait rw rootdelay=10
+    echo    'Loading initial ramdisk ...'
+    initrd /boot/initrd.img-6.17.0-7-generic
+    devicetree /boot/dtb/rockchip/rk3588-orangepi-5-plus.dtb
+}
+)
+sudo mkdir -p /mnt/lib/firmware/arm/mali/arch10.8/
+sudo rm -f /mnt/lib/firmware/arm/mali/arch10.8/*
+sudo wget https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/plain/arm/mali/arch10.8/mali_csffw.bin -P /mnt/lib/firmware/arm/mali/arch10.8/
+sudo chmod 644 /mnt/lib/firmware/arm/mali/arch10.8/mali_csffw.bin
+sudo echo "panthor" | sudo tee /mnt/etc/modules-load.d/panthor.conf
+
+sync; sudo umount /mnt;
+Eject NVMe-SSD from PC.
+
+
 Login:
 Username: linaro
 Password: linaro
@@ -38,12 +78,18 @@ lsb_release -a
 sudo dpkg-reconfigure tzdata
 sudo dpkg-reconfigure locales
 date
-sudo apt update
-sudo apt upgrade
-sudo apt dist-upgrade
+sudo apt update; sudo apt upgrade -y; sudo apt dist-upgrade -y;
 sync
 free
+sudo update-initramfs -u -k $(uname -r)
+sudo vi /boot/grub/grub.cfg ( change to:
+   initrd /boot/initrd.img-6.18.0-rc4-dirty
+)
+sync
+sudo reboot
 
+uname -a
+lsb_release -a
 glxinfo | grep OpenGL
 date
 Check if Ubuntu is running UEFI mode:
@@ -53,14 +99,18 @@ echo $XDG_SESSION_TYPE
 Check audio driver: ( pulseaudio or pipewire )
 pactl info
 
-sudo apt install speedtest-cli python3-pip python3-setuptools ffmpeg mpv glmark2-es2-wayland pandoc vlc vlc-plugin-video-output pavucontrol git vsftpd
+sudo apt install speedtest-cli python3-pip python3-setuptools ffmpeg mpv glmark2-es2-wayland pandoc vlc vlc-plugin-video-output pavucontrol git vsftpd 
 
 speedtest-cli --secure
 
 glmark2-es2-wayland
+
 aplay -l
 pavucontrol ( set hdmi as default )
 
+sudo add-apt-repository ppa:mozillateam/ppa
+sudo apt update
+sudo apt install firefox-esr
 firefox -> youtube.com -> search YmDNhi07_Ho
 
 Do follows on PC, then ftp swan.mp4 to opi5+.
@@ -75,3 +125,16 @@ cd ../
 mpv --hwdec=auto-copy swan.mp4
 ffplay swan.mp4
 cvlc --gl=wgl --glconv=any swan.mp4
+
+Plugin ASUS USB-BT500 bluetooth usb dongle to opi5+.
+cd /lib/firmware/rtl_bt
+sudo zstd -d rtl8761bu_fw.bin.zst
+sudo zstd -d rtl8761bu_config.bin.zst
+sync
+sudo reboot
+
+sudo rfkill list
+hciconfig hci0
+hcitool dev
+hciconfig -a
+

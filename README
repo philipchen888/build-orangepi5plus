@@ -113,3 +113,7 @@ Steps to build orangepi5plus sdcard image:
 19. cd ~/build-orangepi5plus/fedora        ( Build fedora image )
 
 20. cd ~/build-orangepi5plus/ubuntu-uefi   ( Build ubuntu-uefi image )
+
+21. cd ~/build-orangepi5plus/bookworm-uefi ( Build bookworm-uefi image )
+
+22. cd ~/build-orangepi5plus/trixie-uefi   ( Build trixie-uefi image )
