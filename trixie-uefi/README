@@ -1,7 +1,5 @@
 Build trixie-uefi sdcard image for orangepi5 plus:
 
-Install trixie from usb3 stick trixie iso to empty NVMe-SSD.
-
 Input files: ../linux/linux/tmp/lib/modules
              ../linux/linux/arch/arm64/boot/Image
              ../linux/linux/arch/arm64/boot/dts/rockchip/rk3588-orangepi-5-plus.dtb
@@ -21,7 +19,7 @@ sudo cp -r ../../linux/linux/tmp/lib/modules/* lib/modules/
 find . | cpio -o -H newc | gzip > ../initrd-patched.gz
 cd ../
 
-Plugin usb3 stick to PC. 
+Plugin NVMe SSD to PC. 
 sudo ./mksdcardimg.sh
 sudo mkfs.vfat /dev/sda1
 sudo mkfs.ext4 /dev/sda2
@@ -46,29 +44,26 @@ delete options
 sync; sudo umount /mnt;
 sudo mount /dev/sda1 /mnt
 sudo rm -rf /mnt/b* /mnt/c* /mnt/f* /mnt/o* /mnt/r* /mnt/s* && sync && sudo umount /mnt
-Eject usb3 stick from PC.
+Eject NVMe SSD from PC.
 
-Plugin NVMe-SSD to PC.
-sudo ./mknvme.sh
-Eject NVMe-SSD from PC.
-
-Plugin usb3 stick, NVMe-SSD and ethernet cable to opi5+. Power on opi5+.
+Plugin NVMe SSD and ethernet cable to opi5+. Power on opi5+.
 
 loading missing firmware? No
 Set User name: linaro
 select bottom ethernet.
 Install without kernel modules ( yes )
-Partition ( Manual, select nvme, create yes, select free, auto partion, all, finish, Yes )
+Partition ( Manual, select space, auto partion, all, finish, Yes )
 Select debian desktop and gnome in addition to ssh and standard system utilities.
 
-Power off opi5+ when installation completed. Remove usb3 stick and NVMe-SSD.
+Power off opi5+ when installation completed. Remove NVMe SSD.
 
-Plugin NVMe-SSD to PC.
+Plugin NVMe SSD to PC.
 sudo fdisk -l /dev/sda
-sudo e2label /dev/sda3 rootfs
-sudo blkid /dev/sda2 ( write down UUID )
-sudo blkid /dev/sda3 ( write down UUID )
-sudo mount /dev/sda3 /mnt
+sudo parted /dev/sda ( print, rm 1, rm 2, print, quit )
+sudo e2label /dev/sda5 rootfs
+sudo blkid /dev/sda4 ( write down UUID )
+sudo blkid /dev/sda5 ( write down UUID )
+sudo mount /dev/sda5 /mnt
 sudo cp -r ../linux/linux/tmp/lib/modules/* /mnt/lib/modules
 sudo cp -r ../linux/linux/tmp/boot/* /mnt/boot
 ls -la /mnt/boot
@@ -78,17 +73,17 @@ set timeout=5
 set default="Boot UUID"
 set menu_color_normal=white/black
 set menu_color_highlight=white/green
-set root=(nvme0n1,gpt3)
 
 menuentry "Boot UUID" {
-    search --no-floppy --fs-uuid --set=root --hint='usb0,gpt3' --hint='mmcblk1,gpt3' --hint='nvme0n1,gpt3' 4d6bb896-e975-4283-887b-78ee3b8dfb83
-    echo    'Loading Linux 6.18.0-rc4-dirty ...'
-    linux /boot/vmlinuz-6.18.0-rc4-dirty root=LABEL=rootfs rootwait rw rootdelay=10
+    search --no-floppy --fs-uuid --set=root d694e093-a4ab-4a25-a9a4-d9b3ec7ba389
+    echo    'Loading Linux 6.18.0-dirty ...'
+    linux /boot/vmlinuz-6.18.0-dirty root=LABEL=rootfs rootwait rw rootdelay=10
     echo    'Loading initial ramdisk ...'
     initrd /boot/initrd.img-6.12.57+deb13-arm64
     devicetree /boot/dtb/rockchip/rk3588-orangepi-5-plus.dtb
 }
 )
+Note: update above UUID accordingly.
 sudo vi /mnt/etc/fstab ( check UUID for /boot/efi )
 sudo mkdir -p /mnt/lib/firmware/arm/mali/arch10.8/
 sudo rm -f /mnt/lib/firmware/arm/mali/arch10.8/*
@@ -96,9 +91,9 @@ sudo wget https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmwar
 sudo chmod 644 /mnt/lib/firmware/arm/mali/arch10.8/mali_csffw.bin
 sudo echo "panthor" | sudo tee /mnt/etc/modules-load.d/panthor.conf
 sync; sudo umount /mnt;
-Eject NVMe-SSD from PC.
+Eject NVMe SSD from PC.
 
-Plugin NVMe-SSD and ethernet cable to opi5+. Power on opi5+.
+Plugin NVMe SSD and ethernet cable to opi5+. Power on opi5+.
 Disable power saving, auto suspend and screen saver.
 su -
 usermod -aG adm,sudo,video linaro
@@ -116,18 +111,19 @@ sudo apt update; sudo apt upgrade -y;
 sudo apt install firmware-realtek
 sync
 free
-
-Check if Debian is running UEFI mode:
-ls /sys/firmware/efi
-
 sudo update-initramfs -u -k $(uname -r)
 sudo vi /boot/grub/grub.cfg ( change to:
-   initrd /boot/initrd.img-6.18.0-rc4-dirty
+   initrd /boot/initrd.img-6.18.0-dirty
 )
 sync
 sudo reboot
 
-sudo apt install flex bison libelf-dev libssl-dev build-essential libncurses-dev git speedtest-cli glmark2-es2-wayland mpv ffmpeg python3-pip python3-setuptools chromium chromium-sandbox pavucontrol zip rfkill vlc vlc-plugin-video-output vsftpd
+uname -a
+lsb_release -a
+Check if Debian is running UEFI mode:
+ls /sys/firmware/efi
+
+sudo apt install flex bison libelf-dev libssl-dev build-essential libncurses-dev git speedtest-cli glmark2-es2-wayland mpv ffmpeg python3-pip python3-setuptools pavucontrol zip rfkill vlc vlc-plugin-video-output vsftpd
 
 speedtest-cli --secure
 
