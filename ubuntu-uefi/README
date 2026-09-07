@@ -12,7 +12,7 @@ Input files: ../linux/linux/tmp/lib/modules
 cd ~/Downloads
 wget https://cdimage.ubuntu.com/ubuntu/releases/questing/release/ubuntu-25.10-desktop-arm64.iso
 
-cd ~/build-rockchip/ubuntu-uefi
+cd ~/build-orangepi5plus/ubuntu-uefi
 
 Plugin USB3 1TB SSD to PC.
 sudo ./mkusb3stick.sh

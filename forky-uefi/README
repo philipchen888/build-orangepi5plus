@@ -10,7 +10,7 @@ wget https://get.debian.org/cdimage/daily-builds/daily/current/arm64/iso-cd/debi
 
 wget http://http.us.debian.org/debian/dists/forky/main/installer-arm64/current/images/netboot/debian-installer/arm64/initrd.gz
 
-cd ~/build-rockchip/forky-uefi
+cd ~/build-orangepi5plus/forky-uefi
 
 Prepare initrd.gz:
 mkdir tmp; cd tmp;

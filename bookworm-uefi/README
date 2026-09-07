@@ -10,7 +10,7 @@ wget https://cloud.debian.org/images/archive/12.12.0/arm64/iso-cd/debian-12.12.0
 
 wget http://http.us.debian.org/debian/dists/bookworm/main/installer-arm64/current/images/netboot/debian-installer/arm64/initrd.gz
 
-cd ~/build-rockchip/bookworm-uefi
+cd ~/build-orangepi5plus/bookworm-uefi
 
 Prepare initrd.gz:
 mkdir tmp; cd tmp;
