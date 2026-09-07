@@ -7,7 +7,7 @@ Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to PC.
 sudo ./mksdcardimg.sh
 Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD and ethernet cable to orangepi 5 plus.
+Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to orangepi 5 plus. Plugin ethernet cable to orangepi 5 plus.
 Esc -> Boot Manager -> ( sdcard, emmc userdata or the last UEFI )
 Login:
 Username: linaro
@@ -53,7 +53,7 @@ cd ../
 )
 
 mpv --hwdec=auto-copy swan.mp4
-ffplay swan.mp4
+ffplay -autoexit swan.mp4
 cvlc --gl=wgl --glconv=any swan.mp4
 
 Plugin ASUS USB-BT500 bluetooth usb dongle to opi5+.

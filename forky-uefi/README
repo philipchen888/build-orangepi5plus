@@ -1,0 +1,155 @@
+Build forky-uefi sdcard image for orangepi5 plus:
+
+Input files: ../linux/linux/tmp/lib/modules
+             ../linux/linux/arch/arm64/boot/Image
+             ../linux/linux/arch/arm64/boot/dts/rockchip/rk3588-orangepi-5-plus.dtb
+
+cd ~/Downloads
+wget https://archives.fedoraproject.org/pub/fedora/linux/releases/44/Workstation/aarch64/images/Fedora-Workstation-Disk-44-1.7.aarch64.raw.xz
+wget https://get.debian.org/cdimage/daily-builds/daily/current/arm64/iso-cd/debian-testing-arm64-netinst.iso
+
+wget http://http.us.debian.org/debian/dists/forky/main/installer-arm64/current/images/netboot/debian-installer/arm64/initrd.gz
+
+cd ~/build-rockchip/forky-uefi
+
+Prepare initrd.gz:
+mkdir tmp; cd tmp;
+sudo gzip -dc ~/Downloads/initrd.gz | sudo cpio -id
+sudo cp -r ../../linux/linux/tmp/lib/modules/* lib/modules/
+\rm -f ../initrd-patched.gz
+find . | cpio -o -H newc | gzip > ../initrd-patched.gz
+cd ../
+
+Plugin NVMe SSD to PC. 
+sudo ./mksdcardimg.sh
+sudo mkfs.vfat /dev/sda1
+sudo mkfs.ext4 /dev/sda2
+sudo fdisk -l /dev/sda
+xzcat ~/Downloads/Fedora-Workstation-Disk-44-1.7.aarch64.raw.xz | sudo dd status=progress bs=4096 of=/dev/sda skip=4352 seek=4352 count=640000 conv=notrunc,fsync
+sudo e2fsck -f /dev/sda2
+sudo resize2fs /dev/sda2
+sudo mount /dev/sda2 /mnt
+sudo \rm -rf /mnt/boot /mnt/efi /mnt/dtb-* /mnt/init* /mnt/lost+found /mnt/symvers* /mnt/System* /mnt/vmlinuz* /mnt/.vmlinuz* /mnt/config* /mnt/dtb
+sudo 7z x ~/Downloads/debian-testing-arm64-netinst.iso -o/mnt && sync;
+sudo cp ../linux/linux/arch/arm64/boot/Image /mnt
+sudo cp ../linux/linux/arch/arm64/boot/dts/rockchip/rk3588-orangepi-5-plus.dtb /mnt
+sudo cp initrd-patched.gz /mnt/initrd.gz
+sudo chmod 755 /mnt/loader/entries
+sudo chmod 755 /mnt/loader/entries/*
+sudo vi /mnt/loader/entries/*aarch64.conf ( change to
+linux /Image mirror/suite=forky
+initrd /initrd.gz
+devicetree /rk3588-orangepi-5-plus.dtb
+delete options
+)
+sync; sudo umount /mnt;
+sudo mount /dev/sda1 /mnt
+sudo rm -rf /mnt/b* /mnt/c* /mnt/f* /mnt/o* /mnt/r* /mnt/s* && sync && sudo umount /mnt
+Eject NVMe SSD from PC.
+
+Plugin NVMe SSD and ethernet cable to opi5+. Power on opi5+.
+
+loading missing firmware? No
+Set User name: linaro
+select bottom ethernet.
+Install without kernel modules ( yes )
+Partition ( Manual, select space, auto partion, all, finish, Yes )
+Select debian desktop and gnome in addition to ssh and standard system utilities.
+
+Power off opi5+ when installation completed. Remove NVMe SSD.
+
+Plugin NVMe SSD to PC.
+sudo fdisk -l /dev/sda
+sudo parted /dev/sda ( print, rm 1, rm 2, print, quit )
+sudo e2label /dev/sda5 rootfs
+sudo blkid /dev/sda4 ( write down UUID )
+sudo blkid /dev/sda5 ( write down UUID )
+sudo mount /dev/sda5 /mnt
+sudo cp -r ../linux/linux/tmp/lib/modules/* /mnt/lib/modules
+sudo cp -r ../linux/linux/tmp/boot/* /mnt/boot
+ls -la /mnt/boot
+sudo touch /mnt/boot/grub/grub.cfg
+sudo vi /mnt/boot/grub/grub.cfg ( delete everything, add
+set timeout=5
+set default="Boot UUID"
+set menu_color_normal=white/black
+set menu_color_highlight=white/green
+
+menuentry "Boot UUID" {
+    search --no-floppy --fs-uuid --set=root d694e093-a4ab-4a25-a9a4-d9b3ec7ba389
+    echo    'Loading Linux 6.18.0-dirty ...'
+    linux /boot/vmlinuz-6.18.0-dirty root=LABEL=rootfs rootwait rw rootdelay=10
+    echo    'Loading initial ramdisk ...'
+    initrd /boot/initrd.img-7.1.12+deb14-arm64
+    devicetree /boot/dtb/rockchip/rk3588-orangepi-5-plus.dtb
+}
+)
+Note: update above UUID, devicetree accordingly.
+sudo vi /mnt/etc/fstab ( check UUID for /boot/efi )
+sudo mkdir -p /mnt/lib/firmware/arm/mali/arch10.8/
+sudo rm -f /mnt/lib/firmware/arm/mali/arch10.8/*
+sudo wget https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/plain/arm/mali/arch10.8/mali_csffw.bin -P /mnt/lib/firmware/arm/mali/arch10.8/
+sudo chmod 644 /mnt/lib/firmware/arm/mali/arch10.8/mali_csffw.bin
+sudo echo "panthor" | sudo tee /mnt/etc/modules-load.d/panthor.conf
+sudo mkdir -p /mnt/lib/firmware/brcm
+sudo cp ./packages/* /mnt/lib/firmware/brcm
+sync; sudo umount /mnt;
+Eject NVMe SSD from PC.
+
+Plugin NVMe SSD to opi5+. Plugin ethernet cable to opi5+. Power on opi5+.
+Disable power saving, auto suspend and screen saver.
+su -
+usermod -aG adm,sudo,video linaro
+sync
+click restart
+
+sudo apt install net-tools openssh-server pulseaudio-utils
+sudo ifconfig
+df .
+uname -a
+lsb_release -a
+date
+sudo vi /etc/apt/sources.list ( add non-free-firmware to 3 deb )
+sudo apt update; sudo apt upgrade -y;
+sudo apt install firmware-realtek
+sync
+free
+sudo update-initramfs -u -k $(uname -r)
+sudo vi /boot/grub/grub.cfg ( change to:
+   initrd /boot/initrd.img-6.18.0-dirty
+)
+sync
+sudo reboot
+
+uname -a
+lsb_release -a
+Check if Debian is running UEFI mode:
+ls /sys/firmware/efi
+
+sudo apt install flex bison libelf-dev libssl-dev build-essential libncurses-dev git glmark2-es2-wayland mpv ffmpeg python3-pip python3-setuptools pavucontrol zip rfkill vlc vlc-plugin-video-output vsftpd
+
+glmark2-es2-wayland
+
+aplay -l
+pavucontrol  ( select hdmi as default )
+
+firefox -> youtube -> search YmDNhi07_Ho
+
+Do follows on PC, then ftp swan.mp4 to opi5+.
+(
+git clone https://github.com/yt-dlp/yt-dlp.git
+cd yt-dlp
+make
+cd ../
+~/yt-dlp/yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]' 3qrKjywjo7Q -o swan.mp4 --postprocessor-args " -c:v libx265 -b:v 2M -c:a copy"
+)
+
+mpv --hwdec=auto-copy swan.mp4
+ffplay -autoexit swan.mp4
+cvlc --gl=wgl --glconv=any swan.mp4
+
+Plugin ASUS USB-BT500 bluetooth usb dongle to opi5+.
+sudo rfkill list
+hciconfig hci0
+hcitool dev
+hciconfig -a

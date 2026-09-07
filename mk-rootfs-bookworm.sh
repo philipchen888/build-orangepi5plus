@@ -7,18 +7,6 @@ if [ -e $TARGET_ROOTFS_DIR ]; then
 	sudo rm -rf $TARGET_ROOTFS_DIR
 fi
 
-if [ "$ARCH" == "armhf" ]; then
-	ARCH='armhf'
-elif [ "$ARCH" == "arm64" ]; then
-	ARCH='arm64'
-else
-    echo -e "\033[36m please input is: armhf or arm64...... \033[0m"
-fi
-
-if [ ! $VERSION ]; then
-	VERSION="release"
-fi
-
 if [ ! -e live-image-arm64.tar.tar.gz ]; then
 	echo "\033[36m Run sudo lb build first \033[0m"
 fi
@@ -36,6 +24,10 @@ echo -e "\033[36m Extract image \033[0m"
 sudo tar -xpf live-image-arm64.tar.tar.gz
 
 sudo cp -rf ../linux/linux/tmp/lib/modules $TARGET_ROOTFS_DIR/lib
+
+# packages folder
+sudo mkdir -p $TARGET_ROOTFS_DIR/packages
+sudo cp -rf ../packages/* $TARGET_ROOTFS_DIR/packages
 sudo cp -rf ../linux/linux/tmp/boot/* $TARGET_ROOTFS_DIR/boot
 export KERNEL_VERSION=$(ls $TARGET_ROOTFS_DIR/boot/vmlinuz-* 2>/dev/null | sed 's|.*/vmlinuz-||' | sort -V | tail -n 1)
 echo $KERNEL_VERSION
@@ -46,11 +38,7 @@ cat $TARGET_ROOTFS_DIR/boot/40_custom_uuid
 sudo cp -rf ../overlay/* $TARGET_ROOTFS_DIR/
 
 echo -e "\033[36m Change root.....................\033[0m"
-if [ "$ARCH" == "armhf" ]; then
-	sudo cp /usr/bin/qemu-arm-static $TARGET_ROOTFS_DIR/usr/bin/
-elif [ "$ARCH" == "arm64"  ]; then
-	sudo cp /usr/bin/qemu-aarch64-static $TARGET_ROOTFS_DIR/usr/bin/
-fi
+sudo cp /usr/bin/qemu-aarch64 $TARGET_ROOTFS_DIR/usr/bin/
 
 sudo mount -o bind /proc $TARGET_ROOTFS_DIR/proc
 sudo mount -o bind /sys $TARGET_ROOTFS_DIR/sys
@@ -70,7 +58,7 @@ apt-get update
 \rm -rf /etc/initramfs/post-update.d/z50-raspi-firmware
 apt-get upgrade -y
 apt-get dist-upgrade -y
-apt-get install -y build-essential git wget v4l-utils grub-efi-arm64 zstd gdm3
+apt-get install -y build-essential git wget firmware-linux v4l-utils grub-efi-arm64 e2fsprogs zstd initramfs-tools gdm3
 
 mkdir -p /lib/firmware/arm/mali/arch10.8/
 rm -f /lib/firmware/arm/mali/arch10.8/*
@@ -112,6 +100,11 @@ update-grub
 chmod o+x /usr/lib/dbus-1.0/dbus-daemon-launch-helper
 chmod +x /etc/rc.local
 
+cp /packages/rkwifibt/brcmfmac43456-sdio.bin /lib/firmware/brcm/brcmfmac43456-sdio.radxa,rockpi4b.bin
+cp /packages/rkwifibt/brcmfmac43456-sdio.radxa,rockpi4b.txt /lib/firmware/brcm/
+cp /packages/rkwifibt/BCM4345C5* /lib/firmware/brcm/
+apt-get install -f -y
+
 # Create the linaro user account
 /usr/sbin/useradd -d /home/linaro -G adm,sudo,video -m -N -u 29999 linaro
 echo -e "linaro:linaro" | chpasswd
@@ -119,7 +112,6 @@ echo -e "linaro-alip" | tee /etc/hostname
 
 systemctl enable rc-local
 systemctl enable resize-helper
-systemctl enable bluetooth.service
 chsh -s /bin/bash linaro
 update-initramfs -c -k $KERNEL_VERSION
 sync

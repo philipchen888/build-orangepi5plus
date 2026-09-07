@@ -1,21 +1,23 @@
 Build buildroot sdcard image for orangepi 5 plus.
 
-See ../uboot/README to erase SPI flash.
-
+See ../uboot/README.opi5 to erase SPI flash.
 Input files: ../uboot/out/idbloader.img
              ../uboot/out/u-boot.itb
              ../linux/linux/arch/arm64/boot/Image
              ../linux/linux/arch/arm64/boot/dts/rockchip/rk3588-orangepi-5-plus.dtb
              ../linux/linux/tmp/lib/modules/
 
-wget https://buildroot.org/downloads/buildroot-2025.08.1.tar.gz
-tar -xzf buildroot-2025.08.1.tar.gz
-mv buildroot-2025.08.1 buildroot
+wget https://buildroot.org/downloads/buildroot-2026.05.tar.xz
+tar -xJf buildroot-2026.05.tar.xz
+mv buildroot-2026.05 buildroot
+
 vi ./buildroot/configs/orangepi_5_plus_defconfig ( delete KERNEL, UBOOT, BR2_DOWNLOAD_FORCE_CHECK_HASHES=y, BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_6_12=y, BR2_GLOBAL_PATCH_DIR, append ./patches/orangepi_5_defconfig )
 cp ./patches/orangepi-5/* ./buildroot/board/orangepi/orangepi-5-plus/
+
 cd buildroot
 \rm -rf .config output
 make clean
+sudo update-alternatives --install /usr/bin/install install /usr/bin/gnuinstall 100
 make orangepi_5_plus_defconfig
 make
 
@@ -23,6 +25,8 @@ The result is in ./output/images/sdcard.img
 
 Plugin sdcard to PC.
 sudo dd if=./output/images/sdcard.img of=/dev/sda bs=4096 conv=notrunc,fsync
+
+sudo partprobe /dev/sda
 
 sudo mount /dev/sda4 /mnt
 sudo vi /mnt/etc/network/interfaces ( delete everything after iface lo inet loopback )
@@ -37,14 +41,16 @@ login:
 username: root
 password: linaro
 
+ifconfig
+
 ssh root@192.168.86.211
 
 uname -a
-
 adduser linaro
 
 date
 aplay -l
+
 vi /etc/asound.conf ( add
 pcm.!default {
 type hw
@@ -54,9 +60,9 @@ ctl.!default {
 type hw
 card 1
 }
+)
 
 alsactl -F restore
 
 aplay /home/linaro/yoursong.wav
-mpg123 -a hw:1,0 /home/linaro/yoursong.mp3
 mpv /home/linaro/yoursong.mp3

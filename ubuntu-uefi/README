@@ -1,36 +1,39 @@
 Build ubuntu-uefi sdcard image for orangepi5 plus:
 
-Install ubuntu from usb3 stick ubuntu iso to empty NVMe-SSD.
+Need external fan !!
+ubuntu-26.04 needs 6GB DDR !! So use ubuntu-25.10 for now.
+
+Install ubuntu from USB3 1TB SSD ubuntu iso to empty NVMe-SSD.
 
 Input files: ../linux/linux/tmp/lib/modules
              ../linux/linux/arch/arm64/boot/Image
              ../linux/linux/arch/arm64/boot/dts/rockchip/rk3588-orangepi-5-plus.dtb
 
 cd ~/Downloads
-wget https://cdimage.ubuntu.com/releases/25.10/release/ubuntu-25.10-desktop-arm64.iso
+wget https://cdimage.ubuntu.com/ubuntu/releases/questing/release/ubuntu-25.10-desktop-arm64.iso
 
-cd ~/build-orangepi5plus/ubuntu-uefi
+cd ~/build-rockchip/ubuntu-uefi
 
-Plugin usb3 stick to PC.
+Plugin USB3 1TB SSD to PC.
 sudo ./mkusb3stick.sh
 sudo mkfs.vfat /dev/sda1
 sudo fdisk -l /dev/sda
 sudo mount /dev/sda1 /mnt
 sudo 7z x ~/Downloads/ubuntu-25.10-desktop-arm64.iso -o/mnt && sync && sudo umount /mnt
-Eject usb3 stick from PC.
+Eject USB3 1TB SSD from PC.
 
 Plugin NVMe-SSD to PC.
 sudo ./mknvme.sh
 Eject NVMe-SSD from PC.
 
-Plugin NVMe-SSD, usb3 stick and ethernet cable to opi5+. Power on opi5+.
+Plugin NVMe-SSD, USB3 1TB SSD and ethernet cable to opi5+. Power on opi5+.
 
 Select install
 Double click Install Ubuntu LTS icon.
-Erase disk.
+Erase disk.  ( if no NVMe SSD detected, power off/on again )
 Contine till finished. Restart.
 
-Remove usb3 stick from opi5+.
+Remove USB3 1TB SSD from opi5+.
 Plugin NVMe-SSD to PC.
 sudo fdisk -l /dev/sda
 sudo e2label /dev/sda2 rootfs
@@ -52,19 +55,22 @@ menuentry "Boot UUID" {
     echo    'Loading Linux 6.18.0-dirty ...'
     linux /boot/vmlinuz-6.18.0-dirty root=LABEL=rootfs rootwait rw rootdelay=10
     echo    'Loading initial ramdisk ...'
-    initrd /boot/initrd.img-6.17.0-7-generic
+    initrd /boot/initrd.img-6.17.0-41-generic
     devicetree /boot/dtb/rockchip/rk3588-orangepi-5-plus.dtb
 }
 )
-Note: update above UUID accordingly.
+Note: update above UUID, devicetree accordingly.
 sudo mkdir -p /mnt/lib/firmware/arm/mali/arch10.8/
 sudo rm -f /mnt/lib/firmware/arm/mali/arch10.8/*
 sudo wget https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/plain/arm/mali/arch10.8/mali_csffw.bin -P /mnt/lib/firmware/arm/mali/arch10.8/
 sudo chmod 644 /mnt/lib/firmware/arm/mali/arch10.8/mali_csffw.bin
 sudo echo "panthor" | sudo tee /mnt/etc/modules-load.d/panthor.conf
+sudo mkdir -p /mnt/lib/firmware/brcm
+sudo cp ./packages/* /mnt/lib/firmware/brcm
 sync; sudo umount /mnt;
 Eject NVMe-SSD from PC.
 
+Plugin NVMe SSD to opi5+. Plugin ethernet cable to opi5+. Power on opi5+.
 Login:
 Username: linaro
 Password: linaro
@@ -110,10 +116,10 @@ glmark2-es2-wayland
 aplay -l
 pavucontrol ( set hdmi as default )
 
-sudo add-apt-repository ppa:mozillateam/ppa
-sudo apt update; sudo apt upgrade -y;
-sudo apt install firefox-esr
-firefox -> youtube.com -> search YmDNhi07_Ho
+# sudo add-apt-repository ppa:mozillateam/ppa
+# sudo apt update; sudo apt upgrade -y;
+# sudo apt install firefox-esr
+# firefox -> youtube.com -> search YmDNhi07_Ho
 
 Do follows on PC, then ftp swan.mp4 to opi5+.
 (
@@ -125,7 +131,7 @@ cd ../
 )
 
 mpv --hwdec=auto-copy swan.mp4
-ffplay swan.mp4
+ffplay -autoexit swan.mp4
 cvlc --gl=wgl --glconv=any swan.mp4
 
 Plugin ASUS USB-BT500 bluetooth usb dongle to opi5+.

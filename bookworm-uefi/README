@@ -5,17 +5,18 @@ Input files: ../linux/linux/tmp/lib/modules
              ../linux/linux/arch/arm64/boot/dts/rockchip/rk3588-orangepi-5-plus.dtb
 
 cd ~/Downloads
-wget https://archives.fedoraproject.org/pub/fedora/linux/releases/43/Workstation/aarch64/images/Fedora-Workstation-Disk-43-1.6.aarch64.raw.xz
-wget https://mirror.us.mirhosting.net/debian-cd/12.11.0/arm64/iso-cd/debian-12.11.0-arm64-netinst.iso
+wget https://archives.fedoraproject.org/pub/fedora/linux/releases/44/Workstation/aarch64/images/Fedora-Workstation-Disk-44-1.7.aarch64.raw.xz
+wget https://cloud.debian.org/images/archive/12.12.0/arm64/iso-cd/debian-12.12.0-arm64-netinst.iso
 
 wget http://http.us.debian.org/debian/dists/bookworm/main/installer-arm64/current/images/netboot/debian-installer/arm64/initrd.gz
 
-cd ~/build-orangepi5plus/bookworm-uefi
+cd ~/build-rockchip/bookworm-uefi
 
 Prepare initrd.gz:
 mkdir tmp; cd tmp;
 sudo gzip -dc ~/Downloads/initrd.gz | sudo cpio -id
 sudo cp -r ../../linux/linux/tmp/lib/modules/* lib/modules/
+\rm -f ../initrd-patched.gz
 find . | cpio -o -H newc | gzip > ../initrd-patched.gz
 cd ../
 
@@ -24,12 +25,12 @@ sudo ./mksdcardimg.sh
 sudo mkfs.vfat /dev/sda1
 sudo mkfs.ext4 /dev/sda2
 sudo fdisk -l /dev/sda
-xzcat ~/Downloads/Fedora-Workstation-Disk-43-1.6.aarch64.raw.xz | sudo dd status=progress bs=4096 of=/dev/sda skip=4352 seek=4352 count=640000 conv=notrunc,fsync
+xzcat ~/Downloads/Fedora-Workstation-Disk-44-1.7.aarch64.raw.xz | sudo dd status=progress bs=4096 of=/dev/sda skip=4352 seek=4352 count=640000 conv=notrunc,fsync
 sudo e2fsck -f /dev/sda2
 sudo resize2fs /dev/sda2
 sudo mount /dev/sda2 /mnt
 sudo \rm -rf /mnt/boot /mnt/efi /mnt/dtb-* /mnt/init* /mnt/lost+found /mnt/symvers* /mnt/System* /mnt/vmlinuz* /mnt/.vmlinuz* /mnt/config* /mnt/dtb
-sudo 7z x ~/Downloads/debian-12.11.0-arm64-netinst.iso -o/mnt && sync;
+sudo 7z x ~/Downloads/debian-12.12.0-arm64-netinst.iso -o/mnt && sync;
 sudo cp ../linux/linux/arch/arm64/boot/Image /mnt
 sudo cp ../linux/linux/arch/arm64/boot/dts/rockchip/rk3588-orangepi-5-plus.dtb /mnt
 sudo cp initrd-patched.gz /mnt/initrd.gz
@@ -78,25 +79,26 @@ menuentry "Boot UUID" {
     echo    'Loading Linux 6.18.0-dirty ...'
     linux /boot/vmlinuz-6.18.0-dirty root=LABEL=rootfs rootwait rw rootdelay=10
     echo    'Loading initial ramdisk ...'
-    initrd /boot/initrd.img-6.1.0-41-arm64
+    initrd /boot/initrd.img-6.1.0-52-arm64
     devicetree /boot/dtb/rockchip/rk3588-orangepi-5-plus.dtb
 }
 )
-Note: update above UUID accordingly.
+Note: update above UUID, devicetree accordingly.
 sudo vi /mnt/etc/fstab ( check UUID for /boot/efi )
 sudo mkdir -p /mnt/lib/firmware/arm/mali/arch10.8/
 sudo rm -f /mnt/lib/firmware/arm/mali/arch10.8/*
 sudo wget https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/plain/arm/mali/arch10.8/mali_csffw.bin -P /mnt/lib/firmware/arm/mali/arch10.8/
 sudo chmod 644 /mnt/lib/firmware/arm/mali/arch10.8/mali_csffw.bin
 sudo echo "panthor" | sudo tee /mnt/etc/modules-load.d/panthor.conf
+sudo mkdir -p /mnt/lib/firmware/brcm
+sudo cp ./packages/* /mnt/lib/firmware/brcm
 sync; sudo umount /mnt;
-
 sudo mount /dev/sda1 /mnt
 sudo \rm -rf /mnt/EFI/fedora
 sync; sudo umount /mnt;
 Eject NVMe SSD from PC.
 
-Plugin NVMe SSD and ethernet cable to opi5+. Power on opi5+.
+Plugin NVMe SSD to opi5+. Plugin ethernet cable to opi5+. Power on opi5+.
 Disable power saving, auto suspend and screen saver.
 su -
 usermod -aG adm,sudo,video linaro
@@ -153,11 +155,11 @@ git clone https://github.com/yt-dlp/yt-dlp.git
 cd yt-dlp
 make
 cd ../
-~/yt-dlp/yt-dlp -f 'bestvideo[ext=mp4][protocol=https]+bestaudio[ext=m4a][protocol=https]' 3qrKjywjo7Q -o swan.mp4 --postprocessor-args " -c:v libx265 -b:v 2M -c:a copy"
+~/yt-dlp/yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]' 3qrKjywjo7Q -o swan.mp4 --postprocessor-args " -c:v libx265 -b:v 2M -c:a copy"
 )
 
 mpv --hwdec=auto-copy swan.mp4
-ffplay swan.mp4
+ffplay -autoexit swan.mp4
 cvlc --gl=wgl --glconv=any swan.mp4
 
 Plugin ASUS USB-BT500 bluetooth usb dongle to opi5+.

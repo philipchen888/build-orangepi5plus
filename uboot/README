@@ -3,6 +3,13 @@ Build uboot image for orangepi 5 plus.
 sudo apt install git gcc g++ build-essential gcc-aarch64-linux-gnu iasl python3-pyelftools uuid-dev
 git clone https://github.com/edk2-porting/edk2-rk3588.git --recursive
 cd edk2-rk3588
+shorten name in line 70 of arm-trusted-firmware/plat/rockchip/rk3588/boards/rk3588_reference_pmic/scmi/rk3588_voltd.c  ( change "scmi_vccio_sd_s0" to "scmi_vccio_sd" )
+vi line 78 of edk2/BaseTools/Source/C/EfiRom/EfiRom.c
+change to if ((Ptr0 = (CHAR8 *) strstr ((CONST CHAR8 *) mOptions.FileList->FileName, DEFAULT_OUTPUT_EXTENSION)) != NULL) {
+vi line 24 of edk2-rockchip/Silicon/Rockchip/Include/Library/uboot-env.h
+vi line 13 of edk2-rockchip/Silicon/Rockchip/RK3588/Drivers/UsbDpPhyDxe/uboot-env.h
+change to 
+//typedef BOOLEAN bool;
 ./build.sh --device orangepi-5plus --release Release
 
 The result is in ./RK3588_NOR_FLASH.img
@@ -10,10 +17,11 @@ The result is in ./RK3588_NOR_FLASH.img
 Download Orangepi5plus_1.2.0_debian_bookworm_desktop_xfce_linux6.1.43.7z from http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-Pi-5-plus-32GB.html
 7z x Orangepi5plus_1.2.0_debian_bookworm_desktop_xfce_linux6.1.43.7z
 Burn debian bookworm desktop image to sdcard.
+Plugin sdcard to PC.
+sudo dd if=~/Downloads/Orangepi5plus_1.2.0_debian_bookworm_desktop_xfce_linux6.1.43.img of=/dev/sda bs=4096 conv=notrunc,fsync 
 sudo mount /dev/sda2 /mnt
 cp ./RK3588_NOR_FLASH.img /mnt/home/orangepi
-sync
-sudo umount /mnt
+sync; sudo umount /mnt
 Eject sdcard from PC.
 
 Plugin sdcard to orangepi 5 plus. Power on orangepi 5 plus.
@@ -28,12 +36,13 @@ sync
 
 After step 1,2 done, Boot NVMe without sdcard.
 
-----------------------------------------------------------------
+---------------------------------------------------------------
 
 Mainline u-boot:
 
 git clone https://github.com/radxa/rkbin.git -b master --tags develop-v20240301
 mv develop-v20240301 rkbin
+\rm -rf u-boot
 git clone https://github.com/orangepi-xunlong/u-boot-orangepi -b v2024.01 --depth=1
 mv u-boot-orangepi u-boot
 vi ./u-boot/configs/orangepi-5-plus-rk3588_defconfig ( append
@@ -44,6 +53,7 @@ CONFIG_BOOTSTD_FULL=y
 CONFIG_BOOTFLOW=y
 CONFIG_BOOTFLOW_FULL=y
 )
+vi u-boot/scripts/dtc/pylibfdt/libfdt.i_shipped search SWIG_Python_AppendOutput add ,1 after val buff
 make u-boot
 The resulta are in ./out/idbloader.img
                         /u-boot.itb

@@ -9,7 +9,7 @@ sudo mount /dev/sda2 /mnt
 sudo cp ./rtlbt/* /mnt/lib/firmware/rtl_bt && sync && sudo umount /mnt
 Eject NVME-SSD/sdcard/emmc/USB2-SATA-SSD from PC.
 
-Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD and ethernet cable to SBC.
+Plugin NVME-SSD/sdcard/emmc/USB2-SATA-SSD to orangepi 5 plus. Plugin ethernet cable to orangepi 5 plus.
 Esc -> Boot Manager -> ( sdcard, emmc userdata or the last UEFI )
 Login:
 Username: linaro
@@ -40,14 +40,11 @@ speedtest-cli --secure
 
 glmark2-es2-wayland
 
-systemctl --user restart pipewire
-systemctl --user restart wireplumber
-sudo systemctl restart alsa-restore
-aplay -l     ( power down / up if no hdmi show up )
-pavucontrol  ( select hdmi0 as default )
+aplay -l     ( if no hdmi show up, sudo udevadm trigger --action=add --subsystem-match=platform )
+pavucontrol  ( select hdmi1 as default )
 
 sudo add-apt-repository ppa:mozillateam/ppa
-sudo apt update
+sudo apt update; sudo apt upgrade -y;
 sudo apt install firefox-esr
 firefox -> youtube -> search YmDNhi07_Ho
 
@@ -61,7 +58,7 @@ cd ../
 )
 
 mpv --hwdec=auto-copy swan.mp4
-ffplay swan.mp4
+ffplay -autoexit swan.mp4
 cvlc --gl=wgl --glconv=any swan.mp4
 
 Plugin ASUS USB-BT500 bluetooth usb dongle to opi5+.

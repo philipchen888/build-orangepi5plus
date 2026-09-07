@@ -1,53 +1,78 @@
-Build fedora sdcard image for orangepi5plus
+Build fedora sdcard image for orangepi 5 plus:
 
 cd ~/Downloads
-wget https://archives.fedoraproject.org/pub/fedora/linux/releases/43/Workstation/aarch64/images/Fedora-Workstation-Disk-43-1.6.aarch64.raw.xz
+wget https://archives.fedoraproject.org/pub/fedora/linux/releases/44/Workstation/aarch64/images/Fedora-Workstation-Disk-44-1.7.aarch64.raw.xz
 
-Plugin usb3 stick to PC.
-cd ~/build-orangepi5plus/fedora
+Plugin USB3 1TB SSD to PC.
 sudo ./mksdcardimg.sh
 sudo mkfs.vfat /dev/sda1
 sudo mkfs.ext4 /dev/sda2
 sudo mkfs.ext4 /dev/sda3
 sudo fdisk -l /dev/sda
-xzcat ~/Downloads/Fedora-Workstation-Disk-43-1.6.aarch64.raw.xz | sudo dd status=progress bs=4096 of=/dev/sda skip=4352 seek=4352 conv=notrunc,fsync
-Eject usb3 stick from PC.
+xzcat ~/Downloads/Fedora-Workstation-Disk-44-1.7.aarch64.raw.xz | sudo dd status=progress bs=4096 of=/dev/sda skip=4352 seek=4352 conv=notrunc,fsync
+sudo mount /dev/sda3 /mnt
+sudo mkdir -p /mnt/root/lib/firmware/brcm
+sudo cp ./packages/* /mnt/root/lib/firmware/brcm
+sync; sudo umount /mnt;
+Eject USB3 1TB SSD from PC.
 
-Plugin usb3 stick and ethernet cable  to opi5+. Power on opi5+.
+Plugin USB3 1TB SSD and ethernet cable to orangepi 5 plus. Power on orangepi 5 plus.
 
 Disable power saving and screen saver.
+
 sudo btrfs filesystem resize max /
 df .
 uname -a
 cat /etc/fedora-release
 sudo systemctl start sshd.service
 sudo systemctl enable sshd.service
+sudo ifconfig
 rpm -qa | grep -i kernel
-sudo dnf install kernel-devel-6.17.1-300.fc43.aarch64
+sudo dnf install kernel-devel-6.19.10-300.fc44.aarch64
 rpm -qa | grep -i kernel
 add: exclude=kernel* to /etc/dnf/dnf.conf
 sudo dnf update
 sudo grub2-editenv create
 sudo grub2-mkconfig -o /boot/grub2/grub.cfg
-sudo sudo grubby --set-default /boot/vmlinuz-6.17.1-300.fc43.aarch64
+sudo sudo grubby --set-default /boot/vmlinuz-6.19.10-300.fc44.aarch64
 sudo grubby --default-kernel
 sudo grubby --info DEFAULT
-sudo grubby --info /boot/vmlinuz-6.17.1-300.fc43.aarch64
+sudo grubby --info /boot/vmlinuz-6.19.10-300.fc44.aarch64
 sudo ls -l /boot/loader/entries
 sync
 free
 sudo reboot
 
-sudo dnf install yt-dlp mpv rfkill speedtest-cli glmark2-es2-wayland
+uname -a
+cat /etc/fedora-release
+sudo dnf install speedtest-cli glmark2-es2-wayland mpv yt-dlp pavucontrol openssl-devel vsftpd vlc pandoc
+
 speedtest-cli --secure
 glmark2-es2-wayland
+
 aplay -l
-pavucontrol ( select hdmi as default )
+pavucontrol  ( select hdmi as default )
 
 firefox -> youtube.com -> search YmDNhi07_Ho
 
-yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]' hyUhEjtlDLA -o avemaria.mp4
-mpv avemaria.mp4
+sudo vi /etc/vsftpd/vsftpd.conf
+sudo systemctl restart vsftpd
+sudo firewall-cmd --add-service=ftp --permanent
+sudo firewall-cmd --reload
+sudo firewall-cmd --list-all
+
+Do follows on PC, then ftp swan.mp4 to orangepi 5 plus
+(
+git clone https://github.com/yt-dlp/yt-dlp.git
+cd yt-dlp
+make 
+cd ../
+~/yt-dlp/yt-dlp -f 'bestvideo[ext=mp4][protocol=https]+bestaudio[ext=m4a][protocol=https]' 3qrKjywjo7Q -o swan.mp4 --postprocessor-args " -c:v libx264 -b:v 2M -c:a copy"
+)
+
+mpv --hwdec=auto-copy swan.mp4
+ffplay -autoexit swan.mp4
+cvlc --gl=wgl --glconv=any swan.mp4
 
 Plugin ASUS BT500 bluetooth usb dongle to opi5+.
 sudo rfkill list

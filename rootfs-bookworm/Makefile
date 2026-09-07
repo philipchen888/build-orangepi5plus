@@ -1,5 +1,6 @@
 export LB_BOOTSTRAP_INCLUDE="apt-transport-https gnupg"
 export ARCH=arm64
+export DISTRIBUTION := resolute
 export CROSS_COMPILE=/usr/bin/aarch64-linux-gnu-
 
 rootfs: clean prebuild buildrootfs postbuild mkimage mkespimage
@@ -25,7 +26,7 @@ prebuild:
 	--binary-images tar \
 	--bootappend-live "hostname=linaro-alip username=linaro" \
 	--bootstrap-qemu-arch arm64 \
-	--bootstrap-qemu-static /usr/bin/qemu-aarch64-static \
+	--bootstrap-qemu-static /usr/bin/qemu-aarch64 \
 	--cache false \
 	--chroot-filesystem none \
 	--compression gzip \
@@ -56,4 +57,4 @@ mkimage:
 	$(PWD)/../mk-image.sh
 
 mkespimage:
-	$(PWD)/../mk-espimage.sh
+	DISTRIBUTION=bookworm $(PWD)/../mk-espimage.sh
