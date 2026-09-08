@@ -1,6 +1,6 @@
 Build buildroot sdcard image for orangepi 5 plus.
 
-See ../uboot/README.opi5 to erase SPI flash.
+See ../uboot/README to erase SPI flash.
 Input files: ../uboot/out/idbloader.img
              ../uboot/out/u-boot.itb
              ../linux/linux/arch/arm64/boot/Image
