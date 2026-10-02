@@ -4,7 +4,7 @@ exec tail -n +3 $0
 menuentry "Boot from UUID" {
     search --no-floppy --fs-uuid --set=root 0c21ae25-58aa-4153-87f6-ea31b7a8e0f5
     echo    'Loading Linux 6.16.0 ...'
-    linux /boot/vmlinuz-6.16.0 root=LABEL=rootfs rootwait rw rootdelay=10 video=HDMI-A-2:1920x1080@60 console=serial0,115200 console=tty1
+    linux /boot/vmlinuz-6.16.0 root=LABEL=rootfs rootwait rw rootdelay=10 video=HDMI-A-1:1920x1080@60 console=serial0,115200 console=tty1
     echo    'Loading initial ramdisk ...'
     initrd /boot/initrd.img-6.16.0
     devicetree /boot/dtb/rockchip/rk3588-orangepi-5-plus.dtb

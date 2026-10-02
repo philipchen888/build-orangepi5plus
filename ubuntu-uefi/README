@@ -1,8 +1,5 @@
 Build ubuntu-uefi sdcard image for orangepi5 plus:
 
-Need external fan !!
-ubuntu-26.04 needs 6GB DDR !! So use ubuntu-25.10 for now.
-
 Install ubuntu from USB3 1TB SSD ubuntu iso to empty NVMe-SSD.
 
 Input files: ../linux/linux/tmp/lib/modules
@@ -52,8 +49,8 @@ set menu_color_highlight=white/green
 
 menuentry "Boot UUID" {
     search --no-floppy --fs-uuid --set=root d9f66b23-9b3d-4c90-9f58-ccf99c0e88fa
-    echo    'Loading Linux 6.18.0-dirty ...'
-    linux /boot/vmlinuz-6.18.0-dirty root=LABEL=rootfs rootwait rw rootdelay=10
+    echo    'Loading Linux 6.19.0-dirty ...'
+    linux /boot/vmlinuz-6.19.0-dirty root=LABEL=rootfs rootwait rw rootdelay=10
     echo    'Loading initial ramdisk ...'
     initrd /boot/initrd.img-6.17.0-41-generic
     devicetree /boot/dtb/rockchip/rk3588-orangepi-5-plus.dtb
@@ -83,6 +80,7 @@ sudo dpkg-reconfigure tzdata
 sudo dpkg-reconfigure locales
 date
 sudo apt update; sudo apt upgrade -y; sudo apt dist-upgrade -y;
+sudo apt autoremove
 cd /lib/firmware/rtl_bt
 sudo zstd -d rtl8761bu_fw.bin.zst
 sudo zstd -d rtl8761bu_config.bin.zst
@@ -91,7 +89,7 @@ sync
 free
 sudo update-initramfs -u -k $(uname -r)
 sudo vi /boot/grub/grub.cfg ( change to:
-   initrd /boot/initrd.img-6.18.0-dirty
+   initrd /boot/initrd.img-6.19.0-dirty
 )
 sync
 sudo reboot
@@ -130,7 +128,7 @@ cd ../
 ~/yt-dlp/yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]' 3qrKjywjo7Q -o swan.mp4 --postprocessor-args " -c:v libx265 -b:v 2M -c:a copy"
 )
 
-mpv --hwdec=auto-copy swan.mp4
+mpv swan.mp4
 ffplay -autoexit swan.mp4
 cvlc --gl=wgl --glconv=any swan.mp4
 

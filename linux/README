@@ -1,6 +1,6 @@
 compile mainline kernel for orangepi5 plus:
 
-git clone --depth=1 --branch v6.18 https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+git clone --depth=1 --branch v6.19 https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
 
 vi ./linux/arch/arm64/configs/defconfig ( enable NVMe change to:
 CONFIG_PHY_ROCKCHIP_PCIE=y

@@ -43,7 +43,7 @@ Steps to build orangepi5plus sdcard image:
    Boot NVMe without sdcard.
 
 4. cd ~/build-orangepi5plus/linux ( Compile mainline kernel )
-   git clone --depth=1 --branch v6.18 https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+   git clone --depth=1 --branch v6.19 https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
    vi ./linux/arch/arm64/configs/defconfig ( enable NVMe )
 
    vi ./linux/arch/arm64/boot/dts/rockchip/rk3588-base.dtsi ( change gpu )
@@ -121,7 +121,7 @@ Steps to build orangepi5plus sdcard image:
 
 17. cd ~/build-orangepi5plus/android       ( Build android image )
 
-18. cd ~/build-orangepi5plus/bookworm-flightaware  ( flightaware in bookworm )
+18. cd ~/build-orangepi5plus/trixie-flightaware  ( Build flightaware image )
 
 19. cd ~/build-orangepi5plus/yocto         ( Build yocto desktop image )
 

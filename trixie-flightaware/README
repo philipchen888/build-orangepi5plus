@@ -1,12 +1,12 @@
-Build bookworm-flightaware sdcard for orangepi 5 plus:
+Build trixie-flightaware sdcard for orangepi 5 plus:
 
 Parts required:
 1. Car/Indoor Antenna for FlightAware.
 2. Band-Pass SMA Filter.
 3. ADS-B 1090MHz PRO USB Stick.
 
-Input files: ../rootfs-bookworm/linaro-rootfs.img
-                               /linaro-esp.img
+Input files: ../rootfs-trixie/linaro-rootfs.img
+                             /linaro-esp.img
 
 Plugin sdcard to PC.
 sudo ./mksdcardimg.sh
@@ -21,6 +21,8 @@ Login:
 Username: linaro
 Password: linaro
 Disable power saving, auto suspend and screen saver.
+sudo systemctl start ssh.service
+sudo systemctl enable ssh.service
 sudo ifconfig
 uname -a
 lsb_release -a
@@ -35,14 +37,14 @@ free
 sudo apt install chrpath tcl-dev python3-dev python3-venv python3-setuptools python3-pip python3-pyelftools libboost-system-dev libboost-program-options-dev libboost-regex-dev libboost-filesystem-dev patchelf itcl3 tcllib tclx8.4 librtlsdr-dev libbladerf-dev libhackrf-dev liblimesuite-dev libsoapysdr-dev libusb-1.0-0-dev pkg-config libncurses5-dev lighttpd
 
 See https://www.flightaware.com/adsb/piaware/install
-sudo apt install tcltls
-wget https://www.flightaware.com/adsb/piaware/files/packages/pool/piaware/f/flightaware-apt-repository/flightaware-apt-repository_1.2_all.deb
-sudo dpkg -i flightaware-apt-repository_1.2_all.deb
+sudo apt install tcl-tls
+wget https://www.flightaware.com/adsb/piaware/files/packages/pool/piaware/f/flightaware-apt-repository/flightaware-apt-repository_1.3_all.deb
+sudo dpkg -i flightaware-apt-repository_1.3_all.deb
 sudo apt update
 sudo apt install piaware dump1090-fa dump978-fa
 
 Change feeder-id on the last line of piaware.conf or comment out for the first time.
-For the first time you need to claim feeder-id from https://flightaware.com/adsb/piaware/claim after plugin ADS-B 1090MHz PRO USB Stick, filter and antenna.
+For the first time you need to claim feeder-id from https://www.flightaware.com/adsb/piaware/build after plugin ADS-B 1090MHz PRO USB Stick, filter and antenna.
 
 If you want to use old feeder-id without claiming a new one, change the last line of piaware.conf to use your old feeder-id.
 
@@ -65,5 +67,5 @@ It has aircraft's info, date, time, GPS position etc.
 
 ./flightdata.py
 
-The website is in https://flightaware.com/adsb/stats/user/yourusername
+The website is in https://www.flightaware.com/adsb/stats/user/yourusername
 The map is in browser http://192.168.86.234:8080/
