@@ -5,8 +5,6 @@ Build yocto desktop sdcard image for orangepi 5 plus.
 
    Input files: ../uboot/out/idbloader.img
                 ../uboot/out/u-boot.itb
-                ../linux/out/boot.img
-                ../linux/linux/tmp/lib/modules/
 
    mkdir ${HOME}/download
    mkdir ${HOME}/sstate-cache
@@ -18,13 +16,14 @@ Build yocto desktop sdcard image for orangepi 5 plus.
    rm -rf build config layers
    python3 bitbake/bin/bitbake-setup init --setup-dir-name $PWD --non-interactive ../patches/orangepi5plus.conf.json orangepi5plus
    cp ../patches/local.conf ./build/conf
-   cp ../patches/rockchip.wks ./layers/meta-rockchip/wic
-   cp ../patches/hdmi-audio.cfg ./layers/meta-rockchip/recipes-kernel/linux/linux-yocto
+   cp ../patches/rockchip.wks ./layers/meta-rockchip/files/wic
+   cp ../patches/hdmi-audio.cfg ./layers/meta-rockchip/recipes-kernel/linux/linux-rockchip
    vi ./layers/meta-rockchip/recipes-kernel/linux/linux-yocto_%.bbappend ( append
    SRC_URI:append:rockchip = " file://hdmi-audio.cfg"
    )
    . ./build/init-build-env
 
+   echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns
    bitbake -s
    bitbake -c cleansstate u-boot linux-yocto core-image-weston clang
    bitbake -k u-boot
@@ -37,10 +36,7 @@ Build yocto desktop sdcard image for orangepi 5 plus.
    Plugin sdcard to PC.
    sudo dd if=./tmp/deploy/images/orangepi-5-plus/core-image-weston-orangepi-5-plus.rootfs.wic of=/dev/sda bs=4096 conv=notrunc,fsync
 
-   sudo mount /dev/sda4 /mnt
-   sudo vi /mnt/etc/network/interfaces ( delete everything after iface lo inet loopback )
-   sudo mkdir -p /mnt/lib/modules
-   sudo cp -r ../../../linux/linux/tmp/lib/modules/* /mnt/lib/modules
+   sudo mount /dev/sda3 /mnt
    sudo vi /mnt/etc/xdg/weston/weston.ini ( delete everything, add
    [core]
    xwayland=true

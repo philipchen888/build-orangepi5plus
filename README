@@ -10,6 +10,8 @@ Parts needed:
 7. USB2 SATA SSD
 8. ASUS USB-BT500 bluetooth usb dongle.
 
+Note: Recover spi flash when bricked see ~/build-orangepi5plus/uboot/README 
+
 Steps to build orangepi5plus sdcard image:
 
 1. git clone https://github.com/philipchen888/build-orangepi5plus.git

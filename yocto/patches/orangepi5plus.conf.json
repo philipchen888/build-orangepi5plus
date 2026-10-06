@@ -5,7 +5,7 @@
             "git-remote": {
                 "remotes": {
                     "origin": {
-                        "uri": "git://git.openembedded.org/bitbake;protocol=https"
+                        "uri": "https://git.openembedded.org/bitbake"
                     }
                 },
                 "branch": "master",
@@ -17,11 +17,11 @@
             "git-remote": {
                 "remotes": {
                     "origin": {
-                        "uri": "git://git.openembedded.org/openembedded-core;protocol=https"
+                        "uri": "https://git.openembedded.org/openembedded-core"
                     }
                 },
-                "branch": "master",
-                "rev": "master"
+                "branch": "wrynose",
+                "rev": "wrynose"
             },
             "path": "openembedded-core"
         },
@@ -29,11 +29,11 @@
             "git-remote": {
                 "remotes": {
                     "origin": {
-                        "uri": "git://git.yoctoproject.org/meta-yocto;protocol=https"
+                        "uri": "https://git.yoctoproject.org/meta-yocto"
                     }
                 },
-                "branch": "master",
-                "rev": "master"
+                "branch": "wrynose",
+                "rev": "wrynose"
             },
             "path": "meta-yocto"
         },
@@ -41,11 +41,11 @@
             "git-remote": {
                 "remotes": {
                     "origin": {
-                        "uri": "git://git.yoctoproject.org/yocto-docs;protocol=https"
+                        "uri": "https://git.yoctoproject.org/yocto-docs"
                     }
                 },
-                "branch": "master",
-                "rev": "master"
+                "branch": "wrynose",
+                "rev": "wrynose"
             },
             "path": "yocto-docs"
         },
@@ -53,11 +53,11 @@
             "git-remote": {
                 "remotes": {
                     "origin": {
-                        "uri": "git://git.yoctoproject.org/meta-arm;protocol=https"
+                        "uri": "https://git.yoctoproject.org/meta-arm"
                     }
                 },
-                "branch": "master",
-                "rev": "master"
+                "branch": "wrynose",
+                "rev": "wrynose"
             },
             "path": "meta-arm"
         },
@@ -65,11 +65,11 @@
             "git-remote": {
                 "remotes": {
                     "origin": {
-                        "uri": "git://git.yoctoproject.org/meta-rockchip;protocol=https"
+                        "uri": "https://git.yoctoproject.org/meta-rockchip"
                     }
                 },
-                "branch": "master",
-                "rev": "master"
+                "branch": "wrynose",
+                "rev": "wrynose"
             },
             "path": "meta-rockchip"
         },
@@ -77,11 +77,11 @@
             "git-remote": {
                 "remotes": {
                     "origin": {
-                        "uri": "git://git.openembedded.org/meta-openembedded;protocol=https"
+                        "uri": "https://git.openembedded.org/meta-openembedded"
                     }
                 },
-                "branch": "master",
-                "rev": "master"
+                "branch": "wrynose",
+                "rev": "wrynose"
             },
             "path": "meta-openembedded"
         }

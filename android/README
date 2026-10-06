@@ -1,10 +1,10 @@
-Build android EMMC for orangepi 5 plus.
+Build android NVMe SSD for orangepi 5 plus.
 
 1. Download Android image:
    Download prebuilt image from http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-Pi-5-plus-32GB.html  ( android 12 )
    mv ~/Downloads/Android*zip .
    for file in *.zip; do 7z x "$file"; done
-   tar -xzf 'Android 12/SD Card-EMMC Image'/OrangePi5Plus_RK3588_Android12_v1.0.2.tar.gz
+   tar -xzf 'Android 12'/'SPIFlash-NVME SSD Image'/OrangePi5Plus_RK3588_Android12_spi-nvme_v1.0.2.tar.gz
 
 2. Install adb, rkdeveloptool and upgrade_tool:
    On PC install adb rkdeveloptool ( sudo apt install adb rkdeveloptool )
@@ -16,14 +16,18 @@ Build android EMMC for orangepi 5 plus.
    sudo chown root:root /usr/local/bin/upgrade_tool
    sudo chmod a+x /usr/local/bin/upgrade_tool
 
-3. Flash Android image to on board spi and EMMC:
-   Put EMMC on orangepi 5 plus.
+3. Flash Android image to on board spi and NVMe SSD:
+   Put NVMe SSD on orangepi 5 plus.
    Put orangepi 5 plus into maskrom mode.  ( see users manual for how to put orangepi 5 plus into maskrom mode )
-   sudo rkdeveloptool ld                                               ( list devices )
-   sudo upgrade_tool ef OrangePi5Plus_RK3588_Android12_v1.0.2.img      ( EraseFlash )
-   sudo upgrade_tool uf OrangePi5Plus_RK3588_Android12_v1.0.2.img EMMC ( UpgradeFirmware )
+   Make sure the Orange Pi 5 Plus is completely powered down. Remove any MicroSD cards.
+   On orangepi5+ Press and hold the MASKROM button, then plug in USB power and release the MASKROM button.
+   Connect the Orange Pi 5 Plus to your Ubuntu host PC using a high-quality USB Type-C data cable (plugged into the board's Type-C port). 
 
-4. Power on orangepi 5 plus, boot android:
+   sudo rkdeveloptool ld                                                   ( list devices )
+   sudo upgrade_tool ef OrangePi5Plus_RK3588_Android12_spi-nvme_v1.0.2.img ( EraseFlash )
+   sudo upgrade_tool uf OrangePi5Plus_RK3588_Android12_spi-nvme_v1.0.2.img ( UpgradeFirmware )
+
+4. Power on orangepi 5 plus, boot android on NVMe SSD:
    Setup android, sign in play store.
    Turn on developer mode: 
    Settings -> About tablet -> click build number 7 times -> back -> System -> Developer options -> USB debugging enbale.
@@ -72,11 +76,12 @@ Build android EMMC for orangepi 5 plus.
 
 To generate apk:
 1. Download android studio from https://developer.android.com/studio
+   cd ~/Downloads; tar -xzf android-studio-rabbit1-linux.tar.gz
    vi ~/Downloads/android-studio/Install-Linux-tar.txt
 2. cd ~/Downloads/android-studio/bin
-3. ./studio.sh   ( add ~/Downloads/android-studio/bin to ~/.bashrc )
+3. ./studio   ( add ~/Downloads/android-studio/bin to ~/.bashrc )
 4. Start to write project code and generate apk using android studio.
 
 -------------------------------------------------------------------
 
-If you no longer need android and want to go to debain / ubuntu, follow ../uboot/README to program spi for NVMe boot. Also remember to remove EMMC from orangepi 5 plus.
+If you no longer need android and want to go to debain / ubuntu, follow ../uboot/README to program spi for NVMe boot. Also remember to remove NVMe SSD from orangepi 5 plus.

@@ -20,9 +20,6 @@
 
 part loader1   --offset 64s    --fixed-size 4000K --fstype=none --part-name loader1   --source rawcopy --sourceparams="file=../../../../../../../uboot/out/idbloader.img"
 part loader2   --offset 16384s --fixed-size 4096K --fstype=none --part-name loader2   --source rawcopy --sourceparams="file=../../../../../../../uboot/out/u-boot.itb"
-# part trust    --offset 24576s --fixed-size 4096K --fstype=none --part-name trust  --source rawcopy --sourceparams="file=../../../../../../../uboot/out/trust.img"
-# part atf       --offset 24576s --fixed-size 4096K --fstype=none --part-name atf
-part boot --offset 32768s  --fixed-size 524288K --fstype=vfat --part-name boot --label boot --active --source rawcopy --sourceparams="file=../../../../../../../linux/out/boot.img"
-part /  --fixed-size 5242880K  --label rootfsA --active  --fstype=ext4 --part-name rootfsA --source rootfs  --part-type ${ROOT_DPS}
+part /  --offset 32768s --fixed-size 5242880K  --label rootfsA --active  --fstype=ext4 --part-name rootfsA --source rootfs  --part-type ${ROOT_DPS}
 
 bootloader --ptable gpt
